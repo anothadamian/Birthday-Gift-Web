@@ -50,7 +50,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   left: 50%;
   width: clamp(190px, 29vmax, 420px);
   aspect-ratio: 1;
-  object-fit: contain;
+  background: url('/journey/transition-magnolia.webp') center / contain no-repeat;
   opacity: 0;
   transform: translate(-50%, -50%) scale(.03) rotate(0deg);
   filter: drop-shadow(0 10px 16px rgba(96, 38, 58, .13));
@@ -83,7 +83,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   100% { opacity: 0; }
 }
 
-.game-stage, .gift-stage { touch-action: none; background: url('/journey/dream-valley.png') center/cover no-repeat; }
+.game-stage, .gift-stage { touch-action: none; background: url('/journey/dream-valley.webp') center/cover no-repeat; }
 .game-hud { position: absolute; z-index: 20; top: 78px; left: 50%; width: min(520px, calc(100% - 32px)); padding: 10px 16px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.7); border-radius: 17px; background: rgba(255,255,255,.82); box-shadow: 0 10px 30px rgba(45,96,122,.12); text-align: center; backdrop-filter: blur(12px); }
 .game-hud p { margin: 0 0 6px; color: #526779; font-size: 12px; }
 .game-hud div { display: flex; justify-content: center; gap: 24px; color: #b32e59; font-family: var(--mono); font-size: 12px; font-weight: 600; }
@@ -95,6 +95,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .game-start-card > span { color: #c33e67; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
 .game-start-card h2 { margin: 6px 0 10px; color: #4c3140; font-family: var(--serif); font-size: 35px; }
 .game-start-card p { margin: 0 auto 18px; color: #62717b; font-size: 13px; line-height: 1.6; }
+.game-card-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.skip-game { min-height: 38px; padding: 0 14px; border: 0; color: #7b5260; background: transparent; font-family: var(--mono); font-size: 9px; letter-spacing: .05em; text-decoration: underline; text-underline-offset: 4px; text-transform: uppercase; }
 .game-move-controls { position: absolute; z-index: 24; bottom: 18px; left: 50%; display: grid; grid-template-columns: 56px auto 56px; align-items: center; gap: 10px; transform: translateX(-50%); }
 .game-move-controls button { width: 56px; height: 48px; border: 0; border-radius: 15px; color: white; background: #b82d59; box-shadow: 0 8px 20px rgba(143,32,70,.26); font-size: 20px; }
 .game-move-controls button:disabled { opacity: .4; }
@@ -162,7 +164,15 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .editor-heading h2 { margin: 4px 0 0; font-family: var(--serif); font-size: 34px; }
 .editor-heading > button, .preview-close { width: 42px; height: 42px; border: 0; border-radius: 50%; color: #5d3e49; background: #f4e8e5; font-size: 22px; }
 .journey-editor label { display: grid; margin-bottom: 15px; gap: 6px; font-size: 11px; font-weight: 700; }
-.journey-editor input, .journey-editor textarea { width: 100%; padding: 12px 13px; border: 1px solid #e1d1ca; border-radius: 11px; color: #4d3039; background: white; line-height: 1.5; }
+.journey-editor input, .journey-editor textarea, .journey-editor select { width: 100%; padding: 12px 13px; border: 1px solid #e1d1ca; border-radius: 11px; color: #4d3039; background: white; line-height: 1.5; }
+.editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.photo-editor { margin: 24px 0; padding: 18px; border: 1px solid #e5d5cf; border-radius: 16px; }
+.photo-editor legend { padding: 0 7px; font-family: var(--serif); font-size: 19px; font-weight: 700; }
+.photo-editor > p { margin: 0 0 15px; color: #785e67; font-size: 11px; line-height: 1.5; }
+.photo-editor-row { display: grid; grid-template-columns: 30px 1fr 1fr; align-items: end; gap: 9px; }
+.photo-editor-row > span { align-self: center; color: var(--accent); font-family: var(--mono); font-size: 10px; }
+.editor-actions { position: sticky; bottom: -28px; display: grid; grid-template-columns: .55fr 1fr; margin: 0 -28px -28px; padding: 14px 28px 22px; gap: 9px; background: linear-gradient(transparent, #fffaf7 18%); }
+.cancel-editor { border: 1px solid #dccac4; border-radius: 999px; color: #694954; background: white; }
 .story-preview-wrap { position: relative; width: min(330px, 100%); }
 .preview-close { position: absolute; z-index: 4; top: -12px; right: -12px; }
 .story-poster { padding: 30px 24px 24px; border-radius: 16px; color: #4d2431; background: linear-gradient(180deg, #fff6f8, #ffe8ef); box-shadow: 0 25px 90px rgba(0,0,0,.3); text-align: center; }
@@ -178,15 +188,17 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 
 @media (max-width: 760px) {
   .journey-controls { top: 12px; left: 12px; right: 12px; }
-  .intro-stage { grid-template-columns: 1fr; padding: 95px 20px 48px; text-align: center; }
+  .intro-stage { grid-template-columns: 1fr; padding: 76px 20px 32px; text-align: center; }
   .intro-copy { order: 2; }
   .intro-copy > p { margin-inline: auto; }
-  .intro-copy h1 { font-size: clamp(58px, 20vw, 92px); }
-  .intro-visual { min-height: 330px; order: 1; }
-  .intro-visual img { width: min(250px, 65vw); max-height: 340px; }
-  .bouquet-halo { width: 270px; }
+  .intro-copy h1 { font-size: clamp(52px, 17vw, 76px); }
+  .intro-copy > p { margin-bottom: 16px; font-size: 14px; }
+  .intro-visual { min-height: 255px; order: 1; }
+  .intro-visual img { width: min(205px, 55vw); max-height: 260px; }
+  .bouquet-halo { width: 225px; }
   .hand-note { right: 8%; bottom: 7%; }
   .theme-picker { justify-content: center; }
+  .theme-picker { margin-bottom: 18px; }
   .scroll-cue { display: none; }
   .transition-bloom { width: clamp(170px, 36vmax, 280px); }
   .game-hud { top: 70px; }
@@ -208,6 +220,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .story-heading { position: relative; top: auto; margin-bottom: 60px; text-align: center; }
   .memory-column { gap: 55px; }
   .letter-card { padding: 70px 25px 45px; }
+  .journey-editor { padding: 22px; }
+  .editor-grid { grid-template-columns: 1fr; }
+  .photo-editor { padding: 14px; }
+  .photo-editor-row { grid-template-columns: 25px 1fr; }
+  .photo-editor-row label { grid-column: 2; }
+  .photo-editor-row > span { grid-row: span 2; }
+  .editor-actions { bottom: -22px; margin: 0 -22px -22px; padding: 13px 22px 18px; grid-template-columns: .48fr 1fr; }
   .ending-actions { flex-direction: column; width: min(300px, 100%); }
   .ending-actions button { width: 100%; }
 }
