@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
-import './template-overrides.css';
-import './generated-art.css';
-import './interactive-polish.css';
+import './journey.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://birthday-mini-love-2026.anothadamian.chatgpt.site'),
   title: 'Made For You — tiny websites, big feelings',
