@@ -1,10 +1,251 @@
-.back-templates{position:absolute;z-index:6;top:24px;left:clamp(20px,5vw,70px);border:0;background:transparent;color:var(--ink);font:500 9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}.back-templates.floating{position:fixed;background:#fbfaf7dd;border:1px solid #cfc6d0;border-radius:999px;padding:10px 14px;backdrop-filter:blur(8px)}
-.theme-vintage{font-family:'Playfair Display',serif}.theme-vintage.opening{background:#801a25;color:#f4ead7}.theme-vintage.opening:before,.theme-vintage.opening:after{border-color:#f4ead777}.theme-vintage .opening-card{width:min(660px,92vw);padding:65px 30px;border:2px solid #f4ead7;outline:7px double #f4ead7}.theme-vintage .opening-card:before{content:'♡';position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-52%);font-size:380px;color:#f4ead7;opacity:.12}.theme-vintage .opening-card>*{position:relative;z-index:1}.theme-vintage .eyebrow,.theme-vintage .opening-from,.theme-vintage .back-templates{color:#f4ead7}.theme-vintage .opening h1 em{color:#e9c8a7}.theme-vintage .open-button{background:#f4ead7;border-color:#f4ead7;color:#801a25}.theme-vintage .open-button b{color:#801a25}.lace-line{position:absolute!important;left:0;right:0;top:17px;height:15px;border-top:4px double #f4ead7;border-bottom:1px dashed #f4ead7}.theme-vintage .hero{background:#801a25;color:#f4ead7}.theme-vintage .hero .eyebrow,.theme-vintage .hero h1 em,.theme-vintage .hero h1 span,.theme-vintage .scroll-cue{color:#f4ead7}.theme-vintage .hero-photo{box-shadow:8px 11px 0 #e8cba5}.theme-vintage .gallery{background:#5d111c}.theme-vintage .surprise-card{border:2px solid #8b1e2d;outline:5px double #8b1e2d;box-shadow:13px 13px 0 #ccb494}.theme-vintage footer{background:#5d111c;color:#f4ead7}
-.theme-vintage .back-templates.floating{background:#f4ead7;color:#801a25;border-color:#f4ead7}.theme-jar .back-templates.floating{background:#ffe8f1;color:#4b1830;border-color:#ffe8f1}
-.theme-jar.opening{background:radial-gradient(circle at 50% 40%,#74213f,#3f1028 72%);color:#ffe8f1}.theme-jar.opening:before,.theme-jar.opening:after{border-color:#edacc9}.theme-jar .opening-card{padding-top:25px}.theme-jar .opening h1 em,.theme-jar .opening .eyebrow{color:#ffb5d3}.theme-jar .opening-from,.theme-jar .back-templates{color:#ffe8f1}.theme-jar .hero{background:linear-gradient(145deg,#4b1830,#8b345a);color:#ffe8f1}.theme-jar .hero .eyebrow,.theme-jar .hero h1 em,.theme-jar .hero h1 span,.theme-jar .scroll-cue{color:#ffbad6}.theme-jar .gallery{background:#4b1830}.theme-jar footer{background:#4b1830;color:#ffe8f1}.jar-card{background:#fff7fa}.memory-jar{display:block;position:relative;width:170px;height:230px;margin:30px auto 28px;border:3px solid #b95a8499;border-radius:25px 25px 52px 52px;background:linear-gradient(140deg,#fff9,#e9a8c240);box-shadow:inset 13px 0 20px #fff8,9px 12px 0 #e7a8c2;border-top:18px solid #a43b69}.memory-jar i{position:absolute;width:65px;height:24px;background:#ffd3e5;border-radius:3px;transform:rotate(8deg);left:31px;bottom:44px;box-shadow:39px -21px 0 #f3b3cd,22px -55px 0 #ffe5ef}.memory-jar i:nth-child(2){transform:rotate(-16deg);left:55px;bottom:85px;background:#ef9fbe}.memory-jar i:nth-child(3){transform:rotate(21deg);left:22px;bottom:120px;background:#ffe8f1}.memory-jar span{position:absolute;inset:53px 0 auto;font-size:31px;color:#a43b69}.jar-hint{margin-bottom:0!important}.reason-note{min-height:56px;margin:0 auto;max-width:380px;padding:17px;background:#f8d9e7;color:#4b1830;font:italic 18px/1.35 'Playfair Display',serif;opacity:.45;transform:rotate(-1deg);transition:.35s}.reason-note.visible{opacity:1;transform:rotate(1deg) scale(1.03)}
-.catalog header{padding:clamp(58px,7vw,94px) 0 48px}.catalog-guide{display:flex;justify-content:space-between;border-top:1px solid #91877a;padding:13px 0 9px;font:9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}.template-art{height:min(30vw,380px)}.scrapbook .template-art:after{background-image:url('/memories/memory-3.jpg')}.template-card:focus-visible .template-art,.template-card:hover .template-art{outline:3px solid #a12632;outline-offset:4px}.template-card:active .template-art{transform:translateY(-2px) scale(.99)}.template-meta>b{display:flex;gap:6px;align-items:center}.site>.hero{padding-top:clamp(78px,8vw,104px)}.site>.hero>.eyebrow{margin-left:122px}.opening button:focus-visible,.site button:focus-visible,.catalog button:focus-visible,.site a:focus-visible{outline:3px solid #ffcf4a;outline-offset:4px}
-.memory-list button{width:100%;display:grid;grid-template-columns:80px 1fr 25px;gap:15px;padding:26px 0;border:0;border-top:1px solid #d8d3dd;background:transparent;color:inherit;text-align:left}.memory-list button:last-child{border-bottom:1px solid #d8d3dd}.memory-list button>span{color:var(--accent);font:11px 'DM Mono',monospace}.memory-list button h3{margin:0;font:600 clamp(21px,3vw,36px)/1.1 'Playfair Display',serif;letter-spacing:-.03em}.memory-list button p{max-height:0;overflow:hidden;opacity:0;margin:0;color:#716b77;font-size:14px;transition:max-height .35s ease,opacity .25s ease,margin .35s}.memory-list button.active p{max-height:90px;opacity:1;margin-top:9px}.memory-list button>b{font-size:24px;font-weight:400}.memory-list button:hover h3{color:var(--accent)}
-.lightbox .close-lightbox{right:4px;top:-42px}.lightbox .prev-photo,.lightbox .next-photo{top:50%;right:auto;left:-54px;width:42px;height:42px;border:1px solid #fff8;border-radius:50%;background:#17121c99;color:#fff;font-size:18px;transform:translateY(-50%)}.lightbox .next-photo{left:auto;right:-54px}.lightbox figcaption{display:flex;justify-content:space-between;gap:20px}.lightbox figcaption small{font:10px 'DM Mono',monospace}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-@media(max-width:650px){.catalog nav p{display:none}.catalog header{grid-template-columns:1fr;padding:65px 0 55px}.catalog-intro{font-size:15px}.template-grid{grid-template-columns:1fr;padding-bottom:65px}.template-art{height:112vw;max-height:520px}.template-art b{font-size:42px}.catalog-footer{gap:20px}.catalog-footer span:last-child{text-align:right}.back-templates.floating{top:14px;left:14px}.theme-vintage .opening-card{padding:60px 18px}.theme-vintage .opening-card:before{font-size:250px}}
-@media(max-width:650px){.catalog header{padding:55px 0 38px}.catalog-guide{padding-top:11px}.template-art{height:92vw;max-height:420px}.site>.hero{padding-top:78px}.site>.hero>.eyebrow{margin-left:110px}.memory-list button{grid-template-columns:45px 1fr 20px}.memory-list button p{font-size:12px}.lightbox .prev-photo{left:8px}.lightbox .next-photo{right:8px}.lightbox .prev-photo,.lightbox .next-photo{background:#17121ccc}.theme-vintage .opening-card:before{font-size:210px}}
+/* ==========================================================================
+   THEME 01: LILAC SCRAPBOOK (Y2K / Bestie)
+   ========================================================================== */
+.theme-scrapbook {
+  --accent: #7651c6;
+  --soft: #f4eeff;
+  --glow: #d8caff;
+  --ink: #29213a;
+  background-color: #f7f4fc;
+  background-image: radial-gradient(#d8caff 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.theme-scrapbook.opening-viewport {
+  background: radial-gradient(circle at 50% 40%, #eee8ff, #ded1ff 70%);
+  color: #29213a;
+}
+
+.scrapbook-cover-card {
+  background: #ffffff;
+  border: 4px solid #7651c6;
+  border-radius: 20px;
+  padding: clamp(36px, 6vw, 60px) clamp(20px, 5vw, 40px);
+  box-shadow: 12px 14px 0 #7651c6, 0 20px 40px rgba(118, 81, 198, 0.2);
+  position: relative;
+  transform: rotate(-1deg);
+}
+
+.scrapbook-sticker {
+  position: absolute;
+  padding: 6px 14px;
+  background: #ffd45c;
+  color: #251f20;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 3px 4px 0 rgba(0,0,0,0.15);
+  transform: rotate(6deg);
+  border: 1px dashed #251f20;
+}
+
+.scrapbook-sticker.top-right {
+  top: -14px;
+  right: 18px;
+}
+
+.scrapbook-sticker.bottom-left {
+  bottom: -12px;
+  left: 18px;
+  background: #ff8eb1;
+  color: #fff;
+  transform: rotate(-8deg);
+}
+
+.theme-scrapbook .letter-section {
+  background: #fff;
+  border-radius: 24px;
+  border: 2px dashed #b5a2e8;
+  margin: 40px auto;
+  max-width: 800px;
+  padding: clamp(32px, 6vw, 60px);
+  box-shadow: 0 10px 30px rgba(118, 81, 198, 0.08);
+}
+
+/* ==========================================================================
+   THEME 02: VINTAGE LOVE LETTER (Antique / Romantic)
+   ========================================================================== */
+.theme-vintage {
+  --accent: #801a25;
+  --soft: #f4ead7;
+  --glow: #dfcbb0;
+  --ink: #381219;
+  font-family: var(--font-serif);
+  background-color: #f7f1e6;
+  background-image: radial-gradient(rgba(128, 26, 37, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.theme-vintage.opening-viewport {
+  background: radial-gradient(circle at 50% 40%, #5e111a, #2b060b 80%);
+  color: #f4ead7;
+}
+
+.theme-vintage .hero-section {
+  background: #f7f1e6;
+  color: #381219;
+}
+
+.theme-vintage .polaroid-hero {
+  border: 1px solid #dfcbb0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), 8px 10px 0 #ccb494;
+}
+
+.theme-vintage .letter-section {
+  background: #fdfaf4;
+  border: 3px double #801a25;
+  padding: clamp(36px, 6vw, 60px);
+  max-width: 780px;
+  margin: 0 auto;
+  border-radius: 6px;
+  box-shadow: inset 0 0 30px rgba(128, 26, 37, 0.05), 10px 10px 0 #dfcbb0;
+  position: relative;
+}
+
+.theme-vintage .letter-section:before {
+  content: '✦';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #801a25;
+  font-size: 18px;
+}
+
+.theme-vintage .letter-section:after {
+  content: '✦';
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  color: #801a25;
+  font-size: 18px;
+}
+
+.theme-vintage footer {
+  background: #381219;
+  color: #f4ead7;
+}
+
+/* ==========================================================================
+   THEME 03: REASONS GLOWING JAR (Pastel Dreamcore)
+   ========================================================================== */
+.theme-jar {
+  --accent: #a43b69;
+  --soft: #fdecf4;
+  --glow: #f9c8de;
+  --ink: #3f1028;
+  background-color: #fff4f9;
+  background-image: radial-gradient(#f7c1d7 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+}
+
+.theme-jar.opening-viewport {
+  background: radial-gradient(circle at 50% 40%, #5d1734, #260514 85%);
+  color: #ffe6f1;
+}
+
+.theme-jar .hero-section {
+  background: linear-gradient(180deg, #ffeef6, #fff4f9);
+}
+
+.theme-jar .polaroid-hero {
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(164, 59, 105, 0.15), 0 0 20px rgba(255, 186, 214, 0.4);
+}
+
+.theme-jar .letter-section {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 2px solid #ffd4e5;
+  padding: clamp(32px, 6vw, 60px);
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 15px 40px rgba(164, 59, 105, 0.08);
+}
+
+.theme-jar footer {
+  background: #3f1028;
+  color: #ffe6f1;
+}
+
+/* ==========================================================================
+   THEME 04: MIDNIGHT MIXTAPE & CONSTELLATION (Retro Cyber / Night)
+   ========================================================================== */
+.theme-midnight {
+  --accent: #38bdf8;
+  --soft: #0e1224;
+  --glow: #7155ff;
+  --ink: #e2e8f0;
+  background-color: #0b0e1b;
+  background-image: radial-gradient(rgba(113, 85, 255, 0.25) 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+  color: #e2e8f0;
+}
+
+.theme-midnight.opening-viewport {
+  background: radial-gradient(circle at 50% 40%, #171d3d, #060812 85%);
+  color: #e2e8f0;
+}
+
+.theme-midnight .hero-section {
+  background: transparent;
+  color: #e2e8f0;
+}
+
+.theme-midnight .polaroid-hero {
+  background: #171d3d;
+  border: 1px solid #3d4a82;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.25);
+}
+
+.theme-midnight .polaroid-hero-caption {
+  color: #38bdf8;
+}
+
+.theme-midnight .letter-section {
+  background: rgba(23, 29, 61, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(113, 85, 255, 0.4);
+  border-radius: 20px;
+  padding: clamp(32px, 6vw, 60px);
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 0 40px rgba(113, 85, 255, 0.15);
+  color: #f1f5f9;
+}
+
+.theme-midnight .cake-module-card {
+  background: rgba(23, 29, 61, 0.8);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #f1f5f9;
+}
+
+.theme-midnight .scratch-card-container {
+  background: #171d3d;
+  border-color: #38bdf8;
+}
+
+.theme-midnight .scratch-hidden-content {
+  background: linear-gradient(135deg, #171d3d, #0f1329);
+  color: #fff;
+}
+
+.theme-midnight .scratch-hidden-content h4 {
+  color: #38bdf8;
+}
+
+.theme-midnight .polaroid-front,
+.theme-midnight .polaroid-back {
+  background: #171d3d;
+  color: #e2e8f0;
+  border: 1px solid #313d6d;
+}
+
+.theme-midnight .polaroid-front-meta span {
+  color: #38bdf8;
+}
+
+.theme-midnight footer {
+  background: #060812;
+  color: #94a3b8;
+}
