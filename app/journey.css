@@ -39,12 +39,49 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .scroll-cue { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); color: var(--accent); font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
 @keyframes bouquet-float { 50% { transform: translateY(-12px) rotate(1deg); } }
 
-.flower-curtain { position: fixed; z-index: 1000; inset: 0; pointer-events: none; visibility: hidden; }
+.flower-curtain { position: fixed; z-index: 1000; inset: 0; overflow: hidden; pointer-events: none; visibility: hidden; }
 .flower-curtain.active { visibility: visible; }
-.flower-panel { position: absolute; top: 0; bottom: 0; width: 55%; background: url('/journey/floral-curtain.png') center/cover; transition: transform .52s cubic-bezier(.75, 0, .25, 1); }
-.flower-panel-left { left: 0; transform: translateX(-102%); }
-.flower-panel-right { right: 0; transform: translateX(102%); background-position: right center; }
-.flower-curtain.active .flower-panel { transform: translateX(0); }
+.flower-transition-backdrop { position: absolute; inset: 0; opacity: 0; background: #f4c8d2; }
+.flower-curtain.active .flower-transition-backdrop { animation: flower-backdrop-cover 1.42s ease both; }
+.transition-bloom {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: clamp(190px, 29vmax, 420px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.03) rotate(0deg);
+  filter: drop-shadow(0 10px 16px rgba(96, 38, 58, .13));
+  will-change: transform, opacity;
+}
+.flower-curtain.active .transition-bloom {
+  animation: flower-bloom-cover 1.32s cubic-bezier(.35, .02, .18, 1) var(--flower-delay) both;
+}
+@keyframes flower-bloom-cover {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.03) rotate(0deg); }
+  8% { opacity: 1; }
+  47%, 62% {
+    opacity: 1;
+    transform:
+      translate(calc(-50% + var(--flower-x)), calc(-50% + var(--flower-y)))
+      scale(var(--flower-scale))
+      rotate(var(--flower-rotation));
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--flower-x)), calc(-50% + var(--flower-y) - 8vh))
+      scale(1.28)
+      rotate(calc(var(--flower-rotation) + 24deg));
+  }
+}
+@keyframes flower-backdrop-cover {
+  0%, 28% { opacity: 0; }
+  48%, 63% { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 .game-stage, .gift-stage { touch-action: none; background: url('/journey/dream-valley.png') center/cover no-repeat; }
 .game-hud { position: absolute; z-index: 20; top: 78px; left: 50%; width: min(520px, calc(100% - 32px)); padding: 10px 16px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.7); border-radius: 17px; background: rgba(255,255,255,.82); box-shadow: 0 10px 30px rgba(45,96,122,.12); text-align: center; backdrop-filter: blur(12px); }
@@ -151,7 +188,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .hand-note { right: 8%; bottom: 7%; }
   .theme-picker { justify-content: center; }
   .scroll-cue { display: none; }
-  .flower-panel { width: 68%; }
+  .transition-bloom { width: clamp(170px, 36vmax, 280px); }
   .game-hud { top: 70px; }
   .catcher { width: 128px; bottom: 30px; }
   .catcher img { height: 170px; }

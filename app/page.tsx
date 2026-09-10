@@ -46,6 +46,20 @@ const floatingMotifs = Array.from({ length: 20 }, (_, index) => ({
   delay: `${(index % 7) * -0.7}s`, icon: ['♥', '✿', '♡', '✦'][index % 4],
 }));
 
+const transitionFlowers = Array.from({ length: 36 }, (_, index) => {
+  const column = index % 6;
+  const row = Math.floor(index / 6);
+  const distanceFromCenter = Math.hypot(column - 2.5, row - 2.5);
+  return {
+    id: index,
+    x: `${(column - 2.5) * 19}vw`,
+    y: `${(row - 2.5) * 19}vh`,
+    rotation: `${(index * 71) % 360 - 180}deg`,
+    scale: `${0.84 + ((index * 17) % 40) / 100}`,
+    delay: `${Math.min(0.13, distanceFromCenter * 0.018)}s`,
+  };
+});
+
 class MelodyPlayer {
   private context: AudioContext | null = null;
   private timer: number | null = null;
@@ -121,8 +135,8 @@ export default function Home() {
   const moveTo = (next: JourneyStage) => {
     if (transitioning) return;
     setTransitioning(true);
-    window.setTimeout(() => { setStage(next); window.scrollTo({ top: 0 }); }, 520);
-    window.setTimeout(() => setTransitioning(false), 1250);
+    window.setTimeout(() => { setStage(next); window.scrollTo({ top: 0 }); }, 720);
+    window.setTimeout(() => setTransitioning(false), 1500);
   };
   const startGame = () => {
     setScore(0); setLives(5); setTimeLeft(35); setPlayerX(50); setFallingItems([]);
@@ -188,7 +202,24 @@ export default function Home() {
   return (
     <main className={`journey-root theme-${gift.theme}`} style={themeStyle}>
       {toast && <div className="journey-toast" role="status">{toast}</div>}
-      <div className={`flower-curtain ${transitioning ? 'active' : ''}`} aria-hidden="true"><div className="flower-panel flower-panel-left" /><div className="flower-panel flower-panel-right" /></div>
+      <div className={`flower-curtain ${transitioning ? 'active' : ''}`} aria-hidden="true">
+        <div className="flower-transition-backdrop" />
+        {transitionFlowers.map((flower) => (
+          <img
+            className="transition-bloom"
+            key={flower.id}
+            src="/journey/transition-magnolia.png"
+            alt=""
+            style={{
+              '--flower-x': flower.x,
+              '--flower-y': flower.y,
+              '--flower-rotation': flower.rotation,
+              '--flower-scale': flower.scale,
+              '--flower-delay': flower.delay,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
       <header className="journey-controls">
         {stage !== 'intro' ? <button className="round-control" onClick={() => moveTo('intro')} aria-label="Kembali ke awal">←</button> : <span className="tiny-brand">made for you ♥</span>}
         <div><button className="soft-control" onClick={() => setEditorOpen(true)}>Edit hadiah</button><button className="round-control" onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? '♪' : '♫'}</button></div>
