@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // GIFT DATA DEFINITION
 interface MemoryItem {
@@ -17,6 +17,13 @@ interface PlacedSticker {
   x: number;
   y: number;
   rotation: number;
+}
+
+interface FallingTreat {
+  id: number;
+  x: number;
+  y: number;
+  emoji: string;
 }
 
 interface GiftData {
@@ -256,6 +263,214 @@ class SoundEngine {
 
 const audio = new SoundEngine();
 
+function PetalTransition({ active }: { active: boolean }) {
+  const petals = useMemo(() => Array.from({ length: 28 }, (_, index) => ({
+    id: index,
+    left: `${(index * 41) % 100}%`,
+    delay: `${(index % 8) * 0.045}s`,
+    drift: `${((index * 19) % 90) - 45}px`,
+    rotate: `${(index * 67) % 360}deg`,
+    glyph: ['🌸', '✿', '❀', '🌷'][index % 4],
+  })), []);
+
+  return (
+    <div className={`petal-transition ${active ? 'active' : ''}`} aria-hidden="true">
+      <div className="petal-transition-wash" />
+      {petals.map((petal) => (
+        <span
+          className="transition-petal"
+          key={petal.id}
+          style={{
+            left: petal.left,
+            animationDelay: petal.delay,
+            '--petal-drift': petal.drift,
+            '--petal-rotate': petal.rotate,
+          } as React.CSSProperties}
+        >
+          {petal.glyph}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function FallingTreatsGame({ accent, onCelebrate }: { accent: string; onCelebrate: () => void }) {
+  const [status, setStatus] = useState<'idle' | 'playing' | 'won' | 'over'>('idle');
+  const [playerX, setPlayerX] = useState(50);
+  const [treats, setTreats] = useState<FallingTreat[]>([]);
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(5);
+  const [timeLeft, setTimeLeft] = useState(35);
+  const playerXRef = useRef(playerX);
+  const celebratedRef = useRef(false);
+
+  useEffect(() => {
+    playerXRef.current = playerX;
+  }, [playerX]);
+
+  const movePlayer = (delta: number) => {
+    if (status !== 'playing') return;
+    setPlayerX((current) => Math.max(8, Math.min(92, current + delta)));
+  };
+
+  const startGame = () => {
+    setTreats([]);
+    setScore(0);
+    setLives(5);
+    setTimeLeft(35);
+    setPlayerX(50);
+    celebratedRef.current = false;
+    setStatus('playing');
+    audio.playSfx('chime');
+  };
+
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        movePlayer(-9);
+      }
+      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        movePlayer(9);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const foods = ['🍓', '🍰', '🍪', '🍬', '🧁', '🍩'];
+    const spawnTimer = window.setInterval(() => {
+      setTreats((current) => [
+        ...current,
+        {
+          id: Date.now() + Math.random(),
+          x: 8 + Math.random() * 84,
+          y: -8,
+          emoji: foods[Math.floor(Math.random() * foods.length)],
+        },
+      ]);
+    }, 750);
+
+    const fallTimer = window.setInterval(() => {
+      setTreats((current) => {
+        let caught = 0;
+        let missed = 0;
+        const next = current
+          .map((treat) => ({ ...treat, y: treat.y + 1.55 }))
+          .filter((treat) => {
+            const isCaught = treat.y >= 76 && treat.y <= 93 && Math.abs(treat.x - playerXRef.current) < 16;
+            if (isCaught) {
+              caught += 1;
+              return false;
+            }
+            if (treat.y > 103) {
+              missed += 1;
+              return false;
+            }
+            return true;
+          });
+
+        if (caught) {
+          audio.playSfx('pop');
+          setScore((currentScore) => Math.min(10, currentScore + caught));
+        }
+        if (missed) {
+          setLives((currentLives) => Math.max(0, currentLives - missed));
+        }
+        return next;
+      });
+    }, 50);
+
+    const clockTimer = window.setInterval(() => {
+      setTimeLeft((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(spawnTimer);
+      window.clearInterval(fallTimer);
+      window.clearInterval(clockTimer);
+    };
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'playing') return;
+    if (score >= 10) {
+      setStatus('won');
+      setTreats([]);
+      audio.playSfx('sparkle');
+      if (!celebratedRef.current) {
+        celebratedRef.current = true;
+        onCelebrate();
+      }
+    } else if (lives <= 0 || timeLeft <= 0) {
+      setStatus('over');
+      setTreats([]);
+    }
+  }, [lives, onCelebrate, score, status, timeLeft]);
+
+  return (
+    <div className="treat-game-shell" style={{ '--game-accent': accent } as React.CSSProperties}>
+      <div className="game-status-row" aria-live="polite">
+        <span>🍓 Skor <strong>{score}/10</strong></span>
+        <span>♡ Nyawa <strong>{lives}</strong></span>
+        <span>⏱ <strong>{timeLeft}s</strong></span>
+      </div>
+
+      <div
+        className="treat-game-arena"
+        onPointerMove={(event) => {
+          if (status !== 'playing') return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          setPlayerX(Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100)));
+        }}
+        aria-label="Arena permainan menangkap makanan"
+      >
+        <div className="game-sky-copy">Tangkap 10 camilan, jangan sampai jatuh!</div>
+        {treats.map((treat) => (
+          <span className="falling-treat" key={treat.id} style={{ left: `${treat.x}%`, top: `${treat.y}%` }}>
+            {treat.emoji}
+          </span>
+        ))}
+        <div className="game-character" style={{ left: `${playerX}%` }} aria-label="Karakter penangkap">
+          <span className="game-basket">🧺</span>
+          <span className="game-character-face">🐰</span>
+        </div>
+
+        {status !== 'playing' && (
+          <div className="game-overlay-card">
+            <span className="game-result-icon">{status === 'won' ? '🏆' : status === 'over' ? '🥺' : '🎮'}</span>
+            <h3>{status === 'won' ? 'Sweet catch!' : status === 'over' ? 'Hampir berhasil!' : 'Catch The Birthday Treats'}</h3>
+            <p>
+              {status === 'won'
+                ? 'Kamu berhasil mengumpulkan semua camilan ulang tahun.'
+                : status === 'over'
+                  ? `Kamu menangkap ${score} camilan. Coba sekali lagi, ya!`
+                  : 'Gerakkan kelinci ke kiri dan kanan. Bisa pakai tombol, keyboard A/D, atau geser jari di arena.'}
+            </p>
+            <button className="btn-pill highlight" onClick={startGame}>
+              {status === 'idle' ? 'Mulai Main →' : 'Main Lagi ↻'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="game-controls" aria-label="Kontrol permainan">
+        <button type="button" onClick={() => movePlayer(-11)} disabled={status !== 'playing'} aria-label="Gerak ke kiri">
+          ← <span>Kiri</span>
+        </button>
+        <p>Geser jari di arena atau gunakan A / D</p>
+        <button type="button" onClick={() => movePlayer(11)} disabled={status !== 'playing'} aria-label="Gerak ke kanan">
+          <span>Kanan</span> →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
@@ -293,6 +508,7 @@ export default function Home() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isPageTransitioning, setIsPageTransitioning] = useState(false);
 
   // Sticker Palette & Placed Stamps
   const [selectedStickerEmoji, setSelectedStickerEmoji] = useState<string | null>(null);
@@ -332,15 +548,34 @@ export default function Home() {
   const currentTemplate = templateOptions.find((t) => t.id === selectedTemplate) || templateOptions[0];
 
   // HANDLERS
+  const transitionTo = (action: () => void) => {
+    if (isPageTransitioning) return;
+    setIsPageTransitioning(true);
+    window.setTimeout(() => {
+      action();
+      window.scrollTo({ top: 0 });
+    }, 320);
+    window.setTimeout(() => setIsPageTransitioning(false), 980);
+  };
+
+  const chooseTemplate = (template: TemplateId) => {
+    audio.playSfx('sparkle');
+    transitionTo(() => {
+      setSelectedTemplate(template);
+      setOpened(false);
+    });
+  };
+
   const handleOpenTemplate = () => {
+    if (isPageTransitioning) return;
     audio.playSfx('pop');
     if (selectedTemplate === 'vintage') {
       setIsWaxCracked(true);
       audio.playSfx('crack');
-      setTimeout(() => setOpened(true), 550);
+      setTimeout(() => transitionTo(() => setOpened(true)), 280);
     } else {
       audio.playSfx('sparkle');
-      setOpened(true);
+      transitionTo(() => setOpened(true));
     }
   };
 
@@ -397,22 +632,36 @@ export default function Home() {
   };
 
   const goBackToCatalog = () => {
-    setSelectedTemplate(null);
-    setOpened(false);
-    setIsWaxCracked(false);
-    setCandleBlown(false);
-    setLetterFoldStage(1);
-    setActiveStarNote(null);
-    setPlacedStickers([]);
-    setSelectedStickerEmoji(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    transitionTo(() => {
+      setSelectedTemplate(null);
+      setOpened(false);
+      setIsWaxCracked(false);
+      setCandleBlown(false);
+      setSurprise(false);
+      setLetterFoldStage(1);
+      setActiveStarNote(null);
+      setPlacedStickers([]);
+      setSelectedStickerEmoji(null);
+    });
   };
 
-  const handleShareLink = () => {
+  const handleShareLink = async () => {
     try {
       const serialized = btoa(unescape(encodeURIComponent(JSON.stringify(giftData))));
       const shareUrl = `${window.location.origin}${window.location.pathname}#data=${serialized}`;
-      navigator.clipboard.writeText(shareUrl);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const fallback = document.createElement('textarea');
+        fallback.value = shareUrl;
+        fallback.style.position = 'fixed';
+        fallback.style.opacity = '0';
+        document.body.appendChild(fallback);
+        fallback.select();
+        const copied = document.execCommand('copy');
+        fallback.remove();
+        if (!copied) throw new Error('Copy command failed');
+      }
       audio.playSfx('sparkle');
       showToast('✨ Link Hadiah Berhasil Disalin!');
     } catch (e) {
@@ -432,6 +681,7 @@ export default function Home() {
   if (!selectedTemplate) {
     return (
       <main className="catalog-wrapper">
+        <PetalTransition active={isPageTransitioning} />
         {toastMessage && <div className="toast-notice">✦ {toastMessage}</div>}
 
         <nav className="catalog-nav">
@@ -458,13 +708,14 @@ export default function Home() {
           </div>
           <div className="catalog-intro-box">
             <p>
-              Satu link interaktif berisi cerita, tumpukan polaroid yang bisa dikocok & dibalik, toples bintang origami, segel lilin wax seal, dan lilin ulang tahun virtual.
+              Satu link interaktif berisi cerita, polaroid yang bisa dibalik, toples bintang, mini-game ulang tahun, dan kejutan lilin virtual.
             </p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <span className="template-feature-chip">🎵 Web Audio Melody</span>
               <span className="template-feature-chip">💌 Unfolding Origami Letter</span>
               <span className="template-feature-chip">✨ Sticker Stamping</span>
               <span className="template-feature-chip">🎂 Virtual Candle Ceremony</span>
+              <span className="template-feature-chip">🎮 Catch The Treats</span>
             </div>
           </div>
         </header>
@@ -499,9 +750,12 @@ export default function Home() {
               </span>
               <div
                 className={`template-preview-frame preview-${template.id}`}
-                onClick={() => {
-                  setSelectedTemplate(template.id);
-                  window.scrollTo({ top: 0 });
+                role="button"
+                tabIndex={0}
+                aria-label={`Preview ${template.name}`}
+                onClick={() => chooseTemplate(template.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') chooseTemplate(template.id);
                 }}
               >
                 <img
@@ -528,12 +782,10 @@ export default function Home() {
                 <div className="template-card-actions">
                   <button
                     className="btn-demo"
-                    onClick={() => {
-                      setSelectedTemplate(template.id);
-                      window.scrollTo({ top: 0 });
-                    }}
+                    onClick={() => chooseTemplate(template.id)}
+                    disabled={isPageTransitioning}
                   >
-                    Buka Hadiah Ini ↗
+                    Lihat Preview Hadiah →
                   </button>
                 </div>
               </div>
@@ -548,6 +800,7 @@ export default function Home() {
               <div className="customizer-header">
                 <h2>🎨 Kustomisasi Hadiah Digital</h2>
                 <button
+                  aria-label="Tutup pengaturan kado"
                   style={{ border: 0, background: 'none', fontSize: '24px' }}
                   onClick={() => setIsCustomizerOpen(false)}
                 >
@@ -643,10 +896,11 @@ export default function Home() {
   if (!opened) {
     return (
       <main className={`opening-viewport theme-${selectedTemplate}`} style={style}>
+        <PetalTransition active={isPageTransitioning} />
         {toastMessage && <div className="toast-notice">✦ {toastMessage}</div>}
 
         <div className="opening-top-nav">
-          <button className="back-catalog-btn" onClick={goBackToCatalog}>
+          <button className="back-catalog-btn" onClick={goBackToCatalog} disabled={isPageTransitioning}>
             ← Kembali ke Katalog
           </button>
           <button className="back-catalog-btn" onClick={toggleBgmState}>
@@ -671,7 +925,7 @@ export default function Home() {
               <p style={{ margin: '12px auto 28px', maxWidth: '420px', color: '#605759', fontSize: '15px' }}>
                 {giftData.intro}
               </p>
-              <button className="btn-pill primary" style={{ padding: '14px 32px', fontSize: '14px' }} onClick={handleOpenTemplate}>
+              <button className="btn-pill primary" style={{ padding: '14px 32px', fontSize: '14px' }} onClick={handleOpenTemplate} disabled={isPageTransitioning}>
                 Buka Scrapbook Kita 📖 →
               </button>
             </div>
@@ -695,7 +949,13 @@ export default function Home() {
               {/* Interactive Wax Seal */}
               <div
                 className={`wax-seal-interactive ${isWaxCracked ? 'cracking' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label="Pecahkan segel dan buka surat"
                 onClick={handleOpenTemplate}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') handleOpenTemplate();
+                }}
                 title="Tekan untuk memecahkan segel lilin"
               >
                 <span className="wax-seal-text">
@@ -718,13 +978,22 @@ export default function Home() {
                 Wishing Stars For<br />
                 <em style={{ color: '#ffb5d3' }}>{giftData.name}.</em>
               </h1>
-              <div className="glowing-jar-hero" onClick={handleOpenTemplate}>
+              <div
+                className="glowing-jar-hero"
+                role="button"
+                tabIndex={0}
+                aria-label="Buka botol harapan"
+                onClick={handleOpenTemplate}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') handleOpenTemplate();
+                }}
+              >
                 <img className="opening-generated-art jar-art" src={decorationAssets.jar} alt="Toples kaca bercahaya berisi surat-surat kecil" />
                 <span style={{ position: 'absolute', bottom: '16px', fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#ffe6f1', textTransform: 'uppercase' }}>
                   Ketuk Untuk Membuka
                 </span>
               </div>
-              <button className="btn-pill highlight" style={{ padding: '12px 28px' }} onClick={handleOpenTemplate}>
+              <button className="btn-pill highlight" style={{ padding: '12px 28px' }} onClick={handleOpenTemplate} disabled={isPageTransitioning}>
                 Buka Botol Harapan ✦
               </button>
             </div>
@@ -744,7 +1013,7 @@ export default function Home() {
                 {giftData.intro}
               </p>
               <img className="opening-generated-art cassette-art" src={decorationAssets.midnight} alt="Kaset retro biru dengan pita membentuk hati dan bintang" />
-              <button className="cassette-play-btn" onClick={handleOpenTemplate}>
+              <button className="cassette-play-btn" onClick={handleOpenTemplate} disabled={isPageTransitioning}>
                 ▶ Putar Kaset & Jelajahi Bintang ✦
               </button>
             </div>
@@ -763,6 +1032,7 @@ export default function Home() {
       style={style}
       onClick={handlePlaceSticker}
     >
+      <PetalTransition active={isPageTransitioning} />
       {toastMessage && <div className="toast-notice">✦ {toastMessage}</div>}
 
       {/* Floating Confetti Shower when candle is blown or surprise is active */}
@@ -821,6 +1091,9 @@ export default function Home() {
         </button>
         <button className="dock-btn" onClick={() => document.getElementById('cake-section')?.scrollIntoView({ behavior: 'smooth' })}>
           🎂 Tiup Lilin
+        </button>
+        <button className="dock-btn" onClick={() => document.getElementById('game-section')?.scrollIntoView({ behavior: 'smooth' })}>
+          🎮 Mini-game
         </button>
         <button className="dock-btn primary" onClick={handleShareLink}>
           🔗 Bagikan
@@ -986,10 +1259,19 @@ export default function Home() {
               <div
                 key={photo.src}
                 className={`polaroid-stack-card ${isDeckFlipped ? 'flipped' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label={isDeckFlipped ? 'Balik ke sisi foto' : 'Balik kartu untuk membaca catatan'}
                 onClick={(e) => {
                   e.stopPropagation();
                   audio.playSfx('pop');
                   setIsDeckFlipped(!isDeckFlipped);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    audio.playSfx('pop');
+                    setIsDeckFlipped(!isDeckFlipped);
+                  }
                 }}
                 title="Ketuk untuk membalik kartu"
               >
@@ -1062,10 +1344,16 @@ export default function Home() {
                   <div
                     key={mem.number}
                     className={`origami-star-card ${isOpen ? 'active' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
                     onClick={(e) => {
                       e.stopPropagation();
                       audio.playSfx(isOpen ? 'pop' : 'sparkle');
                       setActiveStarNote(isOpen ? null : idx);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') setActiveStarNote(isOpen ? null : idx);
                     }}
                   >
                     <div className="star-card-folded">
@@ -1117,10 +1405,16 @@ export default function Home() {
                     key={mem.number}
                     className={`origami-star-card ${isOpen ? 'active' : ''}`}
                     style={{ background: '#171d3d', borderColor: '#3d4a82', color: '#e2e8f0' }}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
                     onClick={(e) => {
                       e.stopPropagation();
                       audio.playSfx(isOpen ? 'pop' : 'sparkle');
                       setActiveStarNote(isOpen ? null : idx);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') setActiveStarNote(isOpen ? null : idx);
                     }}
                   >
                     <div className="star-card-folded">
@@ -1173,10 +1467,16 @@ export default function Home() {
                   <div
                     key={mem.number}
                     className={`origami-star-card ${isOpen ? 'active' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
                     onClick={(e) => {
                       e.stopPropagation();
                       audio.playSfx(isOpen ? 'pop' : 'sparkle');
                       setActiveStarNote(isOpen ? null : idx);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') setActiveStarNote(isOpen ? null : idx);
                     }}
                   >
                     <div className="star-card-folded">
@@ -1210,10 +1510,28 @@ export default function Home() {
         )}
       </section>
 
-      {/* SECTION 4: VIRTUAL BIRTHDAY CAKE & CANDLE CEREMONY */}
+      {/* SECTION 4: FALLING TREATS MINI GAME */}
+      <section className="section game-section" id="game-section" style={{ padding: '0 20px 60px', textAlign: 'center' }}>
+        <p className="catalog-kicker" style={{ justifyContent: 'center' }}>04 / BIRTHDAY BONUS GAME</p>
+        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(30px, 6vw, 44px)', margin: '6px 0 10px' }}>
+          Catch The Birthday Treats! 🍓
+        </h2>
+        <p className="section-helper-copy">
+          Bantu kelinci menangkap 10 camilan sebelum waktu habis. Menang untuk membuka hujan confetti spesial.
+        </p>
+        <FallingTreatsGame
+          accent={currentTemplate.palette.accent}
+          onCelebrate={() => {
+            setSurprise(true);
+            showToast('🏆 Mini-game selesai! Birthday confetti terbuka ✦');
+          }}
+        />
+      </section>
+
+      {/* SECTION 5: VIRTUAL BIRTHDAY CAKE & CANDLE CEREMONY */}
       <section className="section" id="cake-section" style={{ padding: '0 20px 60px' }}>
         <div className="cake-ceremony-box">
-          <p className="catalog-kicker" style={{ justifyContent: 'center' }}>04 / MAKE A WISH CEREMONY</p>
+          <p className="catalog-kicker" style={{ justifyContent: 'center' }}>05 / MAKE A WISH CEREMONY</p>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 6vw, 42px)', margin: '6px 0 10px' }}>
             {candleBlown ? 'Permohonan Terkabul! 🎉' : 'Tiup Lilin Ulang Tahunmu 🎂'}
           </h2>
@@ -1223,7 +1541,17 @@ export default function Home() {
               : 'Pikirkan 1 permohonan tulusmu dalam hati, lalu ketuk kue/lilin di bawah ini untuk meniupnya.'}
           </p>
 
-          <div className="cake-visual-container" onClick={handleBlowCandle} title="Ketuk untuk meniup lilin">
+          <div
+            className="cake-visual-container"
+            role="button"
+            tabIndex={candleBlown ? -1 : 0}
+            aria-label="Tiup lilin ulang tahun"
+            onClick={handleBlowCandle}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') handleBlowCandle();
+            }}
+            title="Ketuk untuk meniup lilin"
+          >
             <div className="candles-row">
               {[0, 1, 2].map((i) => (
                 <div className="candle-stick" key={i}>
@@ -1319,6 +1647,7 @@ export default function Home() {
             <div className="customizer-header">
               <h2>🎨 Kustomisasi Hadiah Digital</h2>
               <button
+                aria-label="Tutup pengaturan kado"
                 style={{ border: 0, background: 'none', fontSize: '24px' }}
                 onClick={() => setIsCustomizerOpen(false)}
               >
