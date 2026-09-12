@@ -29,20 +29,27 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .intro-copy h1 em { display: inline-block; margin-left: 10px; color: var(--accent); font-size: .42em; vertical-align: top; }
 .intro-copy > p { max-width: 440px; margin: 0 0 24px; opacity: .72; font-size: 16px; line-height: 1.65; }
 .password-gate { width: min(430px, 100%); }
-.password-gate > label { display: block; margin-bottom: 9px; color: var(--ink); font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-.password-field { display: grid; grid-template-columns: 32px 1fr 46px; min-height: 56px; padding: 5px 5px 5px 13px; align-items: center; border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--soft) 72%, white); box-shadow: 0 15px 36px color-mix(in srgb, var(--accent) 12%, transparent); transition: border-color .2s, box-shadow .2s, transform .2s; }
-.password-field:focus-within { border-color: var(--accent); box-shadow: 0 18px 42px color-mix(in srgb, var(--accent) 20%, transparent); }
-.password-field > span { color: var(--accent); font-size: 25px; }
-.password-field input { min-width: 0; height: 44px; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 16px; letter-spacing: .08em; }
-.password-field input::placeholder { color: color-mix(in srgb, var(--ink) 42%, transparent); letter-spacing: 0; }
-.password-field button { width: 42px; height: 42px; border: 0; border-radius: 14px; color: white; background: var(--accent); box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 28%, transparent); font-size: 20px; transition: transform .2s, opacity .2s; }
-.password-field button:hover:not(:disabled) { transform: translateX(2px); }
-.password-field button:disabled { cursor: not-allowed; opacity: .38; }
+.birthday-lock-heading { display: flex; margin-bottom: 13px; align-items: center; gap: 11px; }
+.birthday-lock-heading > span { display: grid; width: 39px; height: 39px; flex: 0 0 auto; place-items: center; border-radius: 13px; color: white; background: var(--accent); font-size: 23px; box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 25%, transparent); }
+.birthday-lock-heading div { display: grid; gap: 2px; }
+.birthday-lock-heading strong { font-family: var(--serif); font-size: 18px; }
+.birthday-lock-heading small { opacity: .62; font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
+.birthday-code { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; gap: 8px; }
+.birthday-code span { display: grid; height: 51px; place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 15px; color: color-mix(in srgb, var(--ink) 35%, transparent); background: color-mix(in srgb, var(--soft) 72%, white); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 8%, transparent); font-family: var(--mono); font-size: 20px; transition: transform .18s, border-color .18s, color .18s; }
+.birthday-code span.filled { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.birthday-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.birthday-keypad button { min-height: 43px; border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 13px; color: var(--ink); background: color-mix(in srgb, var(--soft) 76%, white); box-shadow: 0 7px 16px color-mix(in srgb, var(--accent) 7%, transparent); font-family: var(--mono); font-size: 14px; font-weight: 600; transition: transform .14s, background .14s; }
+.birthday-keypad button:hover:not(:disabled) { transform: translateY(-2px); background: white; }
+.birthday-keypad button:active:not(:disabled) { transform: scale(.96); }
+.birthday-keypad button:disabled { cursor: not-allowed; opacity: .32; }
+.birthday-keypad .keypad-delete { color: var(--accent); font-size: 18px; }
+.birthday-keypad .keypad-enter { border-color: var(--accent); color: white; background: var(--accent); font-size: 18px; box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 25%, transparent); }
 .password-hint, .password-error { max-width: none !important; margin: 10px 4px 0 !important; font-size: 11px !important; line-height: 1.5 !important; }
 .password-hint { opacity: .68 !important; }
 .password-hint span { display: inline-block; margin-right: 5px; padding: 3px 7px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .password-error { min-height: 17px; color: #b32652; opacity: 1 !important; }
-.password-gate.has-error .password-field { border-color: #c52d57; animation: password-shake .36s ease; }
+.password-gate.has-error .birthday-code { animation: password-shake .36s ease; }
+.password-gate.has-error .birthday-code span { border-color: #c52d57; color: #b32652; }
 @keyframes password-shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
 .theme-picker { display: flex; max-width: 520px; margin-bottom: 27px; flex-wrap: wrap; gap: 7px; }
 .theme-picker button { display: flex; padding: 8px 11px; align-items: center; gap: 7px; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--soft) 82%, white); font-size: 10px; }
@@ -246,6 +253,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .editor-actions { bottom: -22px; margin: 0 -22px -22px; padding: 13px 22px 18px; grid-template-columns: .48fr 1fr; }
   .ending-actions { flex-direction: column; width: min(300px, 100%); }
   .ending-actions button { width: 100%; }
+}
+
+@media (max-width: 760px) and (max-height: 700px) {
+  .intro-stage { padding: 56px 18px 24px; }
+  .intro-visual { min-height: 130px; }
+  .intro-visual img { width: 120px; max-height: 145px; }
+  .bouquet-halo { width: 150px; }
+  .hand-note { display: none; }
+  .intro-copy h1 { margin: 4px 0 8px; font-size: 44px; }
+  .intro-copy > p { margin-bottom: 10px; font-size: 12px; line-height: 1.4; }
+  .birthday-lock-heading { margin-bottom: 8px; }
+  .birthday-code { margin-bottom: 7px; }
+  .birthday-code span { height: 44px; }
+  .birthday-keypad { gap: 5px; }
+  .birthday-keypad button { min-height: 38px; }
+  .password-hint, .password-error { margin-top: 6px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -24,7 +24,7 @@ interface FallingItem { id: number; x: number; y: number; icon: string; }
 
 const defaultGift: GiftData = {
   name: 'Naya', nickname: 'Nay', from: 'Rara',
-  password: 'naya', passwordHint: 'Nama kamu, huruf kecil.',
+  password: '1209', passwordHint: 'Tanggal dan bulan ulang tahunmu — format DDMM.',
   intro: 'Ada kejutan kecil yang dibuat khusus untukmu.',
   message: 'Selamat ulang tahun untuk seseorang yang selalu berhasil membuat hari biasa terasa lebih hangat. Semoga langkahmu tahun ini dipenuhi cerita baru, tawa yang tulus, dan orang-orang yang selalu memilih tinggal.',
   ending: 'Terima kasih sudah hadir dan tumbuh menjadi dirimu yang sekarang. Dunia lebih indah karena ada kamu.',
@@ -46,6 +46,7 @@ const themes: Record<ThemeId, { name: string; accent: string; soft: string; ink:
 };
 
 const isThemeId = (value: unknown): value is ThemeId => typeof value === 'string' && value in themes;
+const normalizeBirthdayPassword = (value: string) => value.replace(/\D/g, '').slice(0, 4);
 const safeImageSource = (value: string, fallback: string) => {
   const source = value.trim();
   if (source.startsWith('/')) return source;
@@ -66,7 +67,7 @@ const readGiftFromUrl = (): GiftData => {
     return {
       ...defaultGift,
       ...parsed,
-      password: typeof parsed.password === 'string' && parsed.password.trim() ? parsed.password.trim() : defaultGift.password,
+      password: typeof parsed.password === 'string' && normalizeBirthdayPassword(parsed.password).length === 4 ? normalizeBirthdayPassword(parsed.password) : defaultGift.password,
       passwordHint: typeof parsed.passwordHint === 'string' && parsed.passwordHint.trim() ? parsed.passwordHint.trim() : defaultGift.passwordHint,
       theme: isThemeId(parsed.theme) ? parsed.theme : defaultGift.theme,
       photos: photos.length ? photos : defaultGift.photos,
@@ -206,13 +207,28 @@ export default function Home() {
   };
   const unlockGift = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (passwordInput.trim().toLocaleLowerCase('id-ID') !== gift.password.trim().toLocaleLowerCase('id-ID')) {
+    if (passwordInput !== gift.password) {
       setPasswordError(true);
       return;
     }
     setPasswordError(false);
     startGame();
     moveTo('game');
+  };
+  const addPasswordDigit = (digit: string) => {
+    setPasswordInput((value) => `${value}${digit}`.slice(0, 4));
+    setPasswordError(false);
+  };
+  const removePasswordDigit = () => {
+    setPasswordInput((value) => value.slice(0, -1));
+    setPasswordError(false);
+  };
+  const returnToStart = () => {
+    setPlaying(false);
+    setFallingItems([]);
+    setPasswordInput('');
+    setPasswordError(false);
+    moveTo('intro');
   };
   const movePlayer = useCallback((amount: number) => {
     if (playing) setPlayerX((position) => Math.max(7, Math.min(93, position + amount)));
@@ -280,7 +296,7 @@ export default function Home() {
       name: draftGift.name.trim() || defaultGift.name,
       nickname: draftGift.nickname.trim() || draftGift.name.trim() || defaultGift.nickname,
       from: draftGift.from.trim() || defaultGift.from,
-      password: draftGift.password.trim() || defaultGift.password,
+      password: normalizeBirthdayPassword(draftGift.password).length === 4 ? normalizeBirthdayPassword(draftGift.password) : defaultGift.password,
       passwordHint: draftGift.passwordHint.trim() || defaultGift.passwordHint,
       intro: draftGift.intro.trim() || defaultGift.intro,
       message: draftGift.message.trim() || defaultGift.message,
@@ -319,7 +335,7 @@ export default function Home() {
         ))}
       </div>
       <header className="journey-controls">
-        {stage !== 'intro' ? <button className="round-control" onClick={() => moveTo('intro')} aria-label="Kembali ke awal">←</button> : <span className="tiny-brand">made for you ♥</span>}
+        {stage !== 'intro' ? <button className="round-control" onClick={returnToStart} aria-label="Kembali ke awal">←</button> : <span className="tiny-brand">made for you ♥</span>}
         {stage !== 'intro' && <div><button className="soft-control" onClick={openEditor}>Edit hadiah</button><button className="round-control" onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? '♪' : '♫'}</button></div>}
       </header>
 
@@ -328,27 +344,15 @@ export default function Home() {
           {ambient}
           <div className="intro-copy"><span className="eyebrow">A private little surprise for</span><h1>{gift.name}<em>♥</em></h1><p>{gift.intro}</p>
             <form className={`password-gate ${passwordError ? 'has-error' : ''}`} onSubmit={unlockGift}>
-              <label htmlFor="gift-password">Masukkan password rahasianya</label>
-              <div className="password-field">
-                <span aria-hidden="true">♡</span>
-                <input
-                  id="gift-password"
-                  type="password"
-                  value={passwordInput}
-                  onChange={(event) => { setPasswordInput(event.target.value); if (passwordError) setPasswordError(false); }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      event.currentTarget.form?.requestSubmit();
-                    }
-                  }}
-                  placeholder="password..."
-                  autoComplete="off"
-                  aria-describedby="password-hint password-error"
-                  aria-invalid={passwordError}
-                  autoFocus
-                />
-                <button type="submit" disabled={!passwordInput.trim()} aria-label="Buka kejutan">→</button>
+              <div className="birthday-lock-heading"><span aria-hidden="true">♡</span><div><strong>Birthday password</strong><small>Masukkan tanggal ulang tahunmu</small></div></div>
+              <div className="birthday-code" aria-label={`${passwordInput.length} dari 4 angka terisi`} aria-live="polite">
+                {Array.from({ length: 4 }, (_, index) => <span className={passwordInput[index] ? 'filled' : ''} key={index}>{passwordInput[index] ?? '·'}</span>)}
+              </div>
+              <div className="birthday-keypad" aria-label="Keypad tanggal ulang tahun">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => <button type="button" key={digit} onClick={() => addPasswordDigit(String(digit))} aria-label={`Angka ${digit}`}>{digit}</button>)}
+                <button type="button" className="keypad-delete" onClick={removePasswordDigit} disabled={!passwordInput} aria-label="Hapus angka terakhir">⌫</button>
+                <button type="button" onClick={() => addPasswordDigit('0')} aria-label="Angka 0">0</button>
+                <button type="submit" className="keypad-enter" disabled={passwordInput.length !== 4} aria-label="Buka kejutan">♥</button>
               </div>
               <p id="password-hint" className="password-hint"><span>Hint</span> {gift.passwordHint}</p>
               <p id="password-error" className="password-error" role="alert" aria-live="polite">{passwordError ? 'Belum tepat. Coba ingat petunjuknya, ya ♥' : '\u00a0'}</p>
@@ -378,7 +382,7 @@ export default function Home() {
           <section className="story-hero story-section"><img src="/journey/mascot-couple.webp" alt="Momo dan Lili membawa surat" loading="lazy" decoding="async" /><span className="eyebrow">for someone very special</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Scroll pelan-pelan. Ada cerita kecil yang dibuat khusus untukmu.</p><span className="down-arrow">↓</span></section>
           <section className="letter-scene story-section"><div className={`letter-card ${letterOpen ? 'open' : ''}`}><button className="wax-heart" onClick={() => setLetterOpen(true)} disabled={letterOpen} aria-label="Buka surat cinta">♥</button><span className="eyebrow">a letter from {gift.from}</span><h2>{letterOpen ? `Dear ${gift.nickname},` : 'Ada surat untukmu'}</h2>{letterOpen ? <><p className="letter-message">“{gift.message}”</p><p className="signature">with all my love,<br />{gift.from}</p></> : <p>Tekan segel hati untuk membuka pesan.</p>}</div></section>
           <section className="memory-story story-section"><div className="story-heading"><span className="eyebrow">our little archive</span><h2>Potongan waktu<br />yang ingin kusimpan.</h2></div><div className="memory-column">{gift.photos.map((photo, index) => <figure className={index % 2 ? 'tilt-right' : 'tilt-left'} key={index}><img src={photo.src} alt={photo.caption} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultGift.photos[index].src; }} /><figcaption><span>0{index + 1}</span>{photo.caption}</figcaption></figure>)}</div></section>
-          <section className="wish-scene story-section"><img src="/journey/birthday-bouquet.webp" alt="Buket penutup" loading="lazy" decoding="async" /><span className="eyebrow">one last wish</span><h2>{gift.ending}</h2>{wishOpen ? <p className="wish-reveal">“{gift.wish}”</p> : <button className="journey-cta" onClick={() => { setWishOpen(true); melody.sparkle(); }}>Buka doa rahasia ✦</button>}<div className="ending-actions"><button onClick={() => setStoryPreview(true)}>Preview untuk Story</button><button onClick={() => copyGiftLink()}>Salin link hadiah</button><button onClick={() => moveTo('intro')}>Ulangi dari awal</button></div></section>
+          <section className="wish-scene story-section"><img src="/journey/birthday-bouquet.webp" alt="Buket penutup" loading="lazy" decoding="async" /><span className="eyebrow">one last wish</span><h2>{gift.ending}</h2>{wishOpen ? <p className="wish-reveal">“{gift.wish}”</p> : <button className="journey-cta" onClick={() => { setWishOpen(true); melody.sparkle(); }}>Buka doa rahasia ✦</button>}<div className="ending-actions"><button onClick={() => setStoryPreview(true)}>Preview untuk Story</button><button onClick={() => copyGiftLink()}>Salin link hadiah</button><button onClick={returnToStart}>Ulangi dari awal</button></div></section>
         </div>
       )}
 
