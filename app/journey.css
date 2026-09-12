@@ -28,6 +28,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .intro-copy h1 { margin: 8px 0 14px; font-family: var(--serif); font-size: clamp(66px, 10vw, 142px); line-height: .9; letter-spacing: -.055em; }
 .intro-copy h1 em { display: inline-block; margin-left: 10px; color: var(--accent); font-size: .42em; vertical-align: top; }
 .intro-copy > p { max-width: 440px; margin: 0 0 24px; opacity: .72; font-size: 16px; line-height: 1.65; }
+.password-gate { width: min(430px, 100%); }
+.password-gate > label { display: block; margin-bottom: 9px; color: var(--ink); font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.password-field { display: grid; grid-template-columns: 32px 1fr 46px; min-height: 56px; padding: 5px 5px 5px 13px; align-items: center; border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--soft) 72%, white); box-shadow: 0 15px 36px color-mix(in srgb, var(--accent) 12%, transparent); transition: border-color .2s, box-shadow .2s, transform .2s; }
+.password-field:focus-within { border-color: var(--accent); box-shadow: 0 18px 42px color-mix(in srgb, var(--accent) 20%, transparent); }
+.password-field > span { color: var(--accent); font-size: 25px; }
+.password-field input { min-width: 0; height: 44px; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 16px; letter-spacing: .08em; }
+.password-field input::placeholder { color: color-mix(in srgb, var(--ink) 42%, transparent); letter-spacing: 0; }
+.password-field button { width: 42px; height: 42px; border: 0; border-radius: 14px; color: white; background: var(--accent); box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 28%, transparent); font-size: 20px; transition: transform .2s, opacity .2s; }
+.password-field button:hover:not(:disabled) { transform: translateX(2px); }
+.password-field button:disabled { cursor: not-allowed; opacity: .38; }
+.password-hint, .password-error { max-width: none !important; margin: 10px 4px 0 !important; font-size: 11px !important; line-height: 1.5 !important; }
+.password-hint { opacity: .68 !important; }
+.password-hint span { display: inline-block; margin-right: 5px; padding: 3px 7px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.password-error { min-height: 17px; color: #b32652; opacity: 1 !important; }
+.password-gate.has-error .password-field { border-color: #c52d57; animation: password-shake .36s ease; }
+@keyframes password-shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
 .theme-picker { display: flex; max-width: 520px; margin-bottom: 27px; flex-wrap: wrap; gap: 7px; }
 .theme-picker button { display: flex; padding: 8px 11px; align-items: center; gap: 7px; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--soft) 82%, white); font-size: 10px; }
 .theme-picker button > span { width: 9px; height: 9px; border-radius: 50%; background: var(--swatch); }
@@ -188,11 +204,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 
 @media (max-width: 760px) {
   .journey-controls { top: 12px; left: 12px; right: 12px; }
-  .intro-stage { grid-template-columns: 1fr; padding: 76px 20px 32px; text-align: center; }
+  .intro-stage { grid-template-columns: 1fr; padding: 76px 20px 32px; overflow-y: auto; text-align: center; }
   .intro-copy { order: 2; }
   .intro-copy > p { margin-inline: auto; }
   .intro-copy h1 { font-size: clamp(52px, 17vw, 76px); }
   .intro-copy > p { margin-bottom: 16px; font-size: 14px; }
+  .password-gate { margin-inline: auto; text-align: left; }
   .intro-visual { min-height: 255px; order: 1; }
   .intro-visual img { width: min(205px, 55vw); max-height: 260px; }
   .bouquet-halo { width: 225px; }

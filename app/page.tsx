@@ -10,6 +10,8 @@ interface GiftData {
   name: string;
   nickname: string;
   from: string;
+  password: string;
+  passwordHint: string;
   intro: string;
   message: string;
   ending: string;
@@ -22,6 +24,7 @@ interface FallingItem { id: number; x: number; y: number; icon: string; }
 
 const defaultGift: GiftData = {
   name: 'Naya', nickname: 'Nay', from: 'Rara',
+  password: 'naya', passwordHint: 'Nama kamu, huruf kecil.',
   intro: 'Ada kejutan kecil yang dibuat khusus untukmu.',
   message: 'Selamat ulang tahun untuk seseorang yang selalu berhasil membuat hari biasa terasa lebih hangat. Semoga langkahmu tahun ini dipenuhi cerita baru, tawa yang tulus, dan orang-orang yang selalu memilih tinggal.',
   ending: 'Terima kasih sudah hadir dan tumbuh menjadi dirimu yang sekarang. Dunia lebih indah karena ada kamu.',
@@ -63,6 +66,8 @@ const readGiftFromUrl = (): GiftData => {
     return {
       ...defaultGift,
       ...parsed,
+      password: typeof parsed.password === 'string' && parsed.password.trim() ? parsed.password.trim() : defaultGift.password,
+      passwordHint: typeof parsed.passwordHint === 'string' && parsed.passwordHint.trim() ? parsed.passwordHint.trim() : defaultGift.passwordHint,
       theme: isThemeId(parsed.theme) ? parsed.theme : defaultGift.theme,
       photos: photos.length ? photos : defaultGift.photos,
     };
@@ -138,6 +143,8 @@ export default function Home() {
   const [storyPreview, setStoryPreview] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [toast, setToast] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
   const [letterOpen, setLetterOpen] = useState(false);
   const [wishOpen, setWishOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -196,6 +203,16 @@ export default function Home() {
   const startGame = () => {
     setScore(0); setLives(7); setTimeLeft(35); setPlayerX(50); setFallingItems([]);
     wonRef.current = false; setPlaying(true);
+  };
+  const unlockGift = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (passwordInput.trim().toLocaleLowerCase('id-ID') !== gift.password.trim().toLocaleLowerCase('id-ID')) {
+      setPasswordError(true);
+      return;
+    }
+    setPasswordError(false);
+    startGame();
+    moveTo('game');
   };
   const movePlayer = useCallback((amount: number) => {
     if (playing) setPlayerX((position) => Math.max(7, Math.min(93, position + amount)));
@@ -263,6 +280,8 @@ export default function Home() {
       name: draftGift.name.trim() || defaultGift.name,
       nickname: draftGift.nickname.trim() || draftGift.name.trim() || defaultGift.nickname,
       from: draftGift.from.trim() || defaultGift.from,
+      password: draftGift.password.trim() || defaultGift.password,
+      passwordHint: draftGift.passwordHint.trim() || defaultGift.passwordHint,
       intro: draftGift.intro.trim() || defaultGift.intro,
       message: draftGift.message.trim() || defaultGift.message,
       ending: draftGift.ending.trim() || defaultGift.ending,
@@ -301,20 +320,42 @@ export default function Home() {
       </div>
       <header className="journey-controls">
         {stage !== 'intro' ? <button className="round-control" onClick={() => moveTo('intro')} aria-label="Kembali ke awal">←</button> : <span className="tiny-brand">made for you ♥</span>}
-        <div><button className="soft-control" onClick={openEditor}>Edit hadiah</button><button className="round-control" onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? '♪' : '♫'}</button></div>
+        {stage !== 'intro' && <div><button className="soft-control" onClick={openEditor}>Edit hadiah</button><button className="round-control" onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? '♪' : '♫'}</button></div>}
       </header>
 
       {stage === 'intro' && (
         <section className="intro-stage stage-screen">
           {ambient}
-          <div className="intro-copy"><span className="eyebrow">Sebuah kejutan kecil untuk</span><h1>{gift.name}<em>♥</em></h1><p>{gift.intro}</p>
-            <div className="theme-picker" aria-label="Pilih suasana">{(Object.keys(themes) as ThemeId[]).map((theme) => (
-              <button className={gift.theme === theme ? 'active' : ''} key={theme} onClick={() => setGift({ ...gift, theme })} aria-pressed={gift.theme === theme} style={{ '--swatch': themes[theme].accent } as React.CSSProperties}><span />{themes[theme].name}</button>
-            ))}</div>
-            <button className="journey-cta" onClick={() => moveTo('game')}>Mulai kejutannya <span>→</span></button>
+          <div className="intro-copy"><span className="eyebrow">A private little surprise for</span><h1>{gift.name}<em>♥</em></h1><p>{gift.intro}</p>
+            <form className={`password-gate ${passwordError ? 'has-error' : ''}`} onSubmit={unlockGift}>
+              <label htmlFor="gift-password">Masukkan password rahasianya</label>
+              <div className="password-field">
+                <span aria-hidden="true">♡</span>
+                <input
+                  id="gift-password"
+                  type="password"
+                  value={passwordInput}
+                  onChange={(event) => { setPasswordInput(event.target.value); if (passwordError) setPasswordError(false); }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      event.currentTarget.form?.requestSubmit();
+                    }
+                  }}
+                  placeholder="password..."
+                  autoComplete="off"
+                  aria-describedby="password-hint password-error"
+                  aria-invalid={passwordError}
+                  autoFocus
+                />
+                <button type="submit" disabled={!passwordInput.trim()} aria-label="Buka kejutan">→</button>
+              </div>
+              <p id="password-hint" className="password-hint"><span>Hint</span> {gift.passwordHint}</p>
+              <p id="password-error" className="password-error" role="alert" aria-live="polite">{passwordError ? 'Belum tepat. Coba ingat petunjuknya, ya ♥' : '\u00a0'}</p>
+            </form>
           </div>
           <div className="intro-visual"><div className="bouquet-halo" /><img src="/journey/birthday-bouquet.webp" alt="Buket ulang tahun untuk penerima" fetchPriority="high" decoding="async" /><span className="hand-note">picked just for you</span></div>
-          <div className="scroll-cue">01 — a little adventure</div>
+          <div className="scroll-cue">only the right person can enter</div>
         </section>
       )}
 
@@ -341,7 +382,7 @@ export default function Home() {
         </div>
       )}
 
-      {editorOpen && <div className="journey-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditorOpen(false); }}><div ref={editorRef} className="journey-editor" role="dialog" aria-modal="true" aria-labelledby="editor-title"><div className="editor-heading"><div><span className="eyebrow">personalize it</span><h2 id="editor-title">Edit hadiahmu</h2></div><button onClick={() => setEditorOpen(false)} aria-label="Tutup editor">×</button></div><div className="editor-grid"><label>Nama penerima<input value={draftGift.name} maxLength={40} onChange={(event) => setDraftGift({ ...draftGift, name: event.target.value })} /></label><label>Nama panggilan<input value={draftGift.nickname} maxLength={24} onChange={(event) => setDraftGift({ ...draftGift, nickname: event.target.value })} /></label><label>Nama pengirim<input value={draftGift.from} maxLength={40} onChange={(event) => setDraftGift({ ...draftGift, from: event.target.value })} /></label><label>Tema<select value={draftGift.theme} onChange={(event) => setDraftGift({ ...draftGift, theme: event.target.value as ThemeId })}>{(Object.keys(themes) as ThemeId[]).map((theme) => <option key={theme} value={theme}>{themes[theme].name}</option>)}</select></label></div><label>Kalimat pembuka<textarea rows={2} value={draftGift.intro} maxLength={180} onChange={(event) => setDraftGift({ ...draftGift, intro: event.target.value })} /></label><label>Pesan utama<textarea rows={5} value={draftGift.message} maxLength={900} onChange={(event) => setDraftGift({ ...draftGift, message: event.target.value })} /></label><label>Pesan penutup<textarea rows={3} value={draftGift.ending} maxLength={360} onChange={(event) => setDraftGift({ ...draftGift, ending: event.target.value })} /></label><label>Doa rahasia<textarea rows={3} value={draftGift.wish} maxLength={360} onChange={(event) => setDraftGift({ ...draftGift, wish: event.target.value })} /></label><fieldset className="photo-editor"><legend>Foto & caption kenangan</legend><p>Gunakan link gambar publik agar fotonya ikut terbuka saat link hadiah dibagikan.</p>{draftGift.photos.map((photo, index) => <div className="photo-editor-row" key={index}><span>0{index + 1}</span><label>Link foto<input type="url" inputMode="url" value={photo.src} onChange={(event) => setDraftGift({ ...draftGift, photos: draftGift.photos.map((item, photoIndex) => photoIndex === index ? { ...item, src: event.target.value } : item) })} /></label><label>Caption<input value={photo.caption} maxLength={120} onChange={(event) => setDraftGift({ ...draftGift, photos: draftGift.photos.map((item, photoIndex) => photoIndex === index ? { ...item, caption: event.target.value } : item) })} /></label></div>)}</fieldset><div className="editor-actions"><button className="cancel-editor" onClick={() => setEditorOpen(false)}>Batal</button><button className="journey-cta" onClick={saveEditor}>Simpan & salin link →</button></div></div></div>}
+      {editorOpen && <div className="journey-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditorOpen(false); }}><div ref={editorRef} className="journey-editor" role="dialog" aria-modal="true" aria-labelledby="editor-title"><div className="editor-heading"><div><span className="eyebrow">personalize it</span><h2 id="editor-title">Edit hadiahmu</h2></div><button onClick={() => setEditorOpen(false)} aria-label="Tutup editor">×</button></div><div className="editor-grid"><label>Nama penerima<input value={draftGift.name} maxLength={40} onChange={(event) => setDraftGift({ ...draftGift, name: event.target.value })} /></label><label>Nama panggilan<input value={draftGift.nickname} maxLength={24} onChange={(event) => setDraftGift({ ...draftGift, nickname: event.target.value })} /></label><label>Nama pengirim<input value={draftGift.from} maxLength={40} onChange={(event) => setDraftGift({ ...draftGift, from: event.target.value })} /></label><label>Tema<select value={draftGift.theme} onChange={(event) => setDraftGift({ ...draftGift, theme: event.target.value as ThemeId })}>{(Object.keys(themes) as ThemeId[]).map((theme) => <option key={theme} value={theme}>{themes[theme].name}</option>)}</select></label><label>Password pembuka<input value={draftGift.password} maxLength={60} autoComplete="off" onChange={(event) => setDraftGift({ ...draftGift, password: event.target.value })} /></label><label>Hint password<input value={draftGift.passwordHint} maxLength={120} onChange={(event) => setDraftGift({ ...draftGift, passwordHint: event.target.value })} /></label></div><label>Kalimat pembuka<textarea rows={2} value={draftGift.intro} maxLength={180} onChange={(event) => setDraftGift({ ...draftGift, intro: event.target.value })} /></label><label>Pesan utama<textarea rows={5} value={draftGift.message} maxLength={900} onChange={(event) => setDraftGift({ ...draftGift, message: event.target.value })} /></label><label>Pesan penutup<textarea rows={3} value={draftGift.ending} maxLength={360} onChange={(event) => setDraftGift({ ...draftGift, ending: event.target.value })} /></label><label>Doa rahasia<textarea rows={3} value={draftGift.wish} maxLength={360} onChange={(event) => setDraftGift({ ...draftGift, wish: event.target.value })} /></label><fieldset className="photo-editor"><legend>Foto & caption kenangan</legend><p>Gunakan link gambar publik agar fotonya ikut terbuka saat link hadiah dibagikan.</p>{draftGift.photos.map((photo, index) => <div className="photo-editor-row" key={index}><span>0{index + 1}</span><label>Link foto<input type="url" inputMode="url" value={photo.src} onChange={(event) => setDraftGift({ ...draftGift, photos: draftGift.photos.map((item, photoIndex) => photoIndex === index ? { ...item, src: event.target.value } : item) })} /></label><label>Caption<input value={photo.caption} maxLength={120} onChange={(event) => setDraftGift({ ...draftGift, photos: draftGift.photos.map((item, photoIndex) => photoIndex === index ? { ...item, caption: event.target.value } : item) })} /></label></div>)}</fieldset><div className="editor-actions"><button className="cancel-editor" onClick={() => setEditorOpen(false)}>Batal</button><button className="journey-cta" onClick={saveEditor}>Simpan & salin link →</button></div></div></div>}
 
       {storyPreview && <div className="journey-modal-backdrop story-preview-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setStoryPreview(false); }}><div ref={previewRef} className="story-preview-wrap" role="dialog" aria-modal="true" aria-label="Preview hadiah untuk Story"><button className="preview-close" onClick={() => setStoryPreview(false)} aria-label="Tutup preview">×</button><div className="story-poster"><span>UNTUK YANG TERSAYANG</span><h2>{gift.name}</h2><img src={gift.photos[0].src} alt={gift.photos[0].caption} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultGift.photos[0].src; }} /><div className="poster-heart">♥</div><p>Dari {gift.from}</p></div><button className="journey-cta full" onClick={() => copyGiftLink()}>Bagikan link hadiah →</button></div></div>}
     </main>
