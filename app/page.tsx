@@ -97,63 +97,59 @@ const transitionFlowers = Array.from({ length: 36 }, (_, index) => {
 });
 
 const musicTracks = [
-  { title: 'Blossom Waltz', mood: 'soft & sweet', notes: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46], tempo: 620, wave: 'sine' as OscillatorType },
-  { title: 'Starlight Letter', mood: 'dreamy night', notes: [392, 493.88, 587.33, 739.99, 659.25, 587.33, 493.88, 440], tempo: 710, wave: 'triangle' as OscillatorType },
-  { title: 'Sunny Picnic', mood: 'happy little day', notes: [523.25, 587.33, 659.25, 783.99, 659.25, 880, 783.99, 659.25], tempo: 480, wave: 'sine' as OscillatorType },
+  { title: 'Shape of My Heart', mood: 'Backstreet Boys', src: '/music/shape-of-my-heart.mp3' },
+  { title: 'Just the Way You Are', mood: 'Bruno Mars', src: '/music/just-the-way-you-are.mp3' },
+  { title: 'Perfect', mood: 'Ed Sheeran', src: '/music/perfect.mp3' },
 ] as const;
 
 class MelodyPlayer {
-  private context: AudioContext | null = null;
-  private timer: number | null = null;
+  private audio: HTMLAudioElement | null = null;
   private playing = false;
   private trackIndex = 0;
-  private noteIndex = 0;
-  private playNext = () => {
-    if (!this.playing || !this.context) return;
-    const track = musicTracks[this.trackIndex];
-    const now = this.context.currentTime;
-    const oscillator = this.context.createOscillator();
-    const gain = this.context.createGain();
-    oscillator.type = track.wave;
-    oscillator.frequency.value = track.notes[this.noteIndex % track.notes.length];
-    gain.gain.setValueAtTime(0.045, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.58, track.tempo / 1000));
-    oscillator.connect(gain).connect(this.context.destination);
-    oscillator.start(now);
-    oscillator.stop(now + 0.6);
-    this.noteIndex += 1;
-    this.timer = window.setTimeout(this.playNext, track.tempo);
-  };
-  play(trackIndex = this.trackIndex) {
-    const AudioCtor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtor) return false;
-    if (this.timer) window.clearTimeout(this.timer);
-    this.context ||= new AudioCtor();
-    void this.context.resume();
+
+  private loadTrack(trackIndex: number) {
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.src = '';
+    }
     this.trackIndex = trackIndex;
-    this.noteIndex = 0;
+    this.audio = new Audio(musicTracks[trackIndex].src);
+    this.audio.loop = true;
+    this.audio.volume = 0.7;
+  }
+
+  play(trackIndex = this.trackIndex) {
+    if (typeof window === 'undefined') return false;
+    if (!this.audio || this.trackIndex !== trackIndex) {
+      this.loadTrack(trackIndex);
+    }
+    void this.audio!.play().catch(() => null);
     this.playing = true;
-    this.playNext();
     return true;
   }
+
   pause() {
-    if (this.timer) window.clearTimeout(this.timer);
-    this.timer = null;
+    if (this.audio) this.audio.pause();
     this.playing = false;
   }
+
   toggle(trackIndex: number) {
     if (this.playing) { this.pause(); return false; }
     return this.play(trackIndex);
   }
+
   sparkle() {
-    if (!this.context) return;
+    // sparkle effect — keep audio context for short chime
+    if (typeof window === 'undefined') return;
+    const AudioCtor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtor) return;
+    const ctx = new AudioCtor();
     [659.25, 783.99, 1046.5].forEach((frequency, index) => {
-      if (!this.context) return;
-      const now = this.context.currentTime + index * 0.07;
-      const oscillator = this.context.createOscillator(); const gain = this.context.createGain();
+      const now = ctx.currentTime + index * 0.07;
+      const oscillator = ctx.createOscillator(); const gain = ctx.createGain();
       oscillator.type = 'triangle'; oscillator.frequency.value = frequency;
       gain.gain.setValueAtTime(0.09, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      oscillator.connect(gain).connect(this.context.destination); oscillator.start(now); oscillator.stop(now + 0.32);
+      oscillator.connect(gain).connect(ctx.destination); oscillator.start(now); oscillator.stop(now + 0.32);
     });
   }
 }
