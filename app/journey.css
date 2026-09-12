@@ -16,6 +16,20 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .round-control, .soft-control { min-height: 42px; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); background: color-mix(in srgb, var(--soft) 84%, transparent); box-shadow: 0 8px 26px rgba(68, 28, 44, .08); backdrop-filter: blur(14px); }
 .round-control { width: 42px; border-radius: 50%; font-size: 18px; }
 .soft-control { padding: 0 16px; border-radius: 999px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.music-dock { position: fixed; z-index: 80; bottom: 18px; left: 50%; display: grid; grid-template-columns: 38px 46px minmax(135px, 1fr) 38px; width: min(430px, calc(100% - 28px)); min-height: 68px; padding: 9px 11px; align-items: center; gap: 7px; transform: translateX(-50%); border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); border-radius: 22px; color: var(--ink); background: color-mix(in srgb, var(--soft) 82%, white); box-shadow: 0 18px 48px rgba(63, 26, 40, .2); backdrop-filter: blur(18px); animation: music-dock-in .55s cubic-bezier(.2,.8,.2,1) both; }
+.music-skip, .music-toggle { display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.music-skip { width: 36px; height: 36px; font-family: var(--serif); font-size: 27px; }
+.music-toggle { width: 44px; height: 44px; color: white; background: var(--accent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 28%, transparent); font-size: 13px; }
+.music-toggle.playing { animation: music-pulse 1.8s ease-in-out infinite; }
+.music-copy { display: grid; min-width: 0; padding-inline: 4px; }
+.music-copy span { color: var(--accent); font-family: var(--mono); font-size: 7px; letter-spacing: .12em; text-transform: uppercase; }
+.music-copy strong { overflow: hidden; font-family: var(--serif); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.music-copy small { opacity: .58; font-family: var(--mono); font-size: 8px; }
+.music-track-dots { position: absolute; top: -8px; left: 50%; display: flex; padding: 4px 7px; transform: translateX(-50%); gap: 5px; border-radius: 999px; background: color-mix(in srgb, var(--soft) 88%, white); box-shadow: 0 4px 12px rgba(63, 26, 40, .08); }
+.music-track-dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--ink) 20%, transparent); transition: width .2s, background .2s; }
+.music-track-dots button.active { width: 18px; border-radius: 99px; background: var(--accent); }
+@keyframes music-dock-in { from { opacity: 0; transform: translate(-50%, 28px) scale(.94); } }
+@keyframes music-pulse { 50% { transform: scale(.94); box-shadow: 0 5px 13px color-mix(in srgb, var(--accent) 20%, transparent); } }
 .eyebrow { display: block; color: var(--accent); font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
 .journey-cta { display: inline-flex; min-height: 50px; padding: 0 22px; align-items: center; justify-content: center; gap: 22px; border: 0; border-radius: 999px; color: white; background: var(--accent); box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 26%, transparent); font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; transition: transform .2s, box-shadow .2s; }
 .journey-cta:hover { transform: translateY(-2px); box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 34%, transparent); }
@@ -143,7 +157,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .envelope-reveal strong { font-family: var(--serif); font-size: 24px; }
 .envelope-reveal small { margin-top: 7px; font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
 
-.story-stage { position: relative; min-height: 100svh; background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 72%, white)); }
+.story-stage { position: relative; min-height: 100svh; padding-bottom: 92px; background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 72%, white)); }
 .story-ambient { position: fixed; z-index: 1; inset: 0; pointer-events: none; }
 .story-section { position: relative; z-index: 3; min-height: 100svh; padding: 100px 24px; }
 .story-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -211,6 +225,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 
 @media (max-width: 760px) {
   .journey-controls { top: 12px; left: 12px; right: 12px; }
+  .music-dock { bottom: 10px; width: calc(100% - 20px); min-height: 62px; grid-template-columns: 34px 42px minmax(110px, 1fr) 34px; padding: 8px; border-radius: 19px; }
+  .music-skip { width: 32px; height: 32px; }
+  .music-toggle { width: 40px; height: 40px; }
   .intro-stage { grid-template-columns: 1fr; padding: 76px 20px 32px; overflow-y: auto; text-align: center; }
   .intro-copy { order: 2; }
   .intro-copy > p { margin-inline: auto; }

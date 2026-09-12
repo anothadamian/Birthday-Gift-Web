@@ -96,30 +96,54 @@ const transitionFlowers = Array.from({ length: 36 }, (_, index) => {
   };
 });
 
+const musicTracks = [
+  { title: 'Blossom Waltz', mood: 'soft & sweet', notes: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46], tempo: 620, wave: 'sine' as OscillatorType },
+  { title: 'Starlight Letter', mood: 'dreamy night', notes: [392, 493.88, 587.33, 739.99, 659.25, 587.33, 493.88, 440], tempo: 710, wave: 'triangle' as OscillatorType },
+  { title: 'Sunny Picnic', mood: 'happy little day', notes: [523.25, 587.33, 659.25, 783.99, 659.25, 880, 783.99, 659.25], tempo: 480, wave: 'sine' as OscillatorType },
+] as const;
+
 class MelodyPlayer {
   private context: AudioContext | null = null;
   private timer: number | null = null;
   private playing = false;
-  toggle() {
-    if (this.playing) {
-      if (this.timer) window.clearTimeout(this.timer);
-      this.timer = null; this.playing = false; return false;
-    }
+  private trackIndex = 0;
+  private noteIndex = 0;
+  private playNext = () => {
+    if (!this.playing || !this.context) return;
+    const track = musicTracks[this.trackIndex];
+    const now = this.context.currentTime;
+    const oscillator = this.context.createOscillator();
+    const gain = this.context.createGain();
+    oscillator.type = track.wave;
+    oscillator.frequency.value = track.notes[this.noteIndex % track.notes.length];
+    gain.gain.setValueAtTime(0.045, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.58, track.tempo / 1000));
+    oscillator.connect(gain).connect(this.context.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.6);
+    this.noteIndex += 1;
+    this.timer = window.setTimeout(this.playNext, track.tempo);
+  };
+  play(trackIndex = this.trackIndex) {
     const AudioCtor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtor) return false;
-    this.context ||= new AudioCtor(); this.context.resume(); this.playing = true;
-    const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
-    let index = 0;
-    const play = () => {
-      if (!this.playing || !this.context) return;
-      const now = this.context.currentTime;
-      const oscillator = this.context.createOscillator(); const gain = this.context.createGain();
-      oscillator.type = 'sine'; oscillator.frequency.value = notes[index % notes.length];
-      gain.gain.setValueAtTime(0.045, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-      oscillator.connect(gain).connect(this.context.destination); oscillator.start(now); oscillator.stop(now + 0.58);
-      index += 1; this.timer = window.setTimeout(play, 620);
-    };
-    play(); return true;
+    if (this.timer) window.clearTimeout(this.timer);
+    this.context ||= new AudioCtor();
+    void this.context.resume();
+    this.trackIndex = trackIndex;
+    this.noteIndex = 0;
+    this.playing = true;
+    this.playNext();
+    return true;
+  }
+  pause() {
+    if (this.timer) window.clearTimeout(this.timer);
+    this.timer = null;
+    this.playing = false;
+  }
+  toggle(trackIndex: number) {
+    if (this.playing) { this.pause(); return false; }
+    return this.play(trackIndex);
   }
   sparkle() {
     if (!this.context) return;
@@ -143,6 +167,8 @@ export default function Home() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [storyPreview, setStoryPreview] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicUnlocked, setMusicUnlocked] = useState(false);
+  const [activeTrack, setActiveTrack] = useState(0);
   const [toast, setToast] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
@@ -161,6 +187,7 @@ export default function Home() {
   const currentTheme = themes[gift.theme];
 
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
+  useEffect(() => () => melody.pause(), []);
   useEffect(() => {
     document.body.style.overflow = editorOpen || storyPreview ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -224,6 +251,9 @@ export default function Home() {
     setPasswordError(false);
   };
   const returnToStart = () => {
+    melody.pause();
+    setMusicPlaying(false);
+    setMusicUnlocked(false);
     setPlaying(false);
     setFallingItems([]);
     setPasswordInput('');
@@ -309,7 +339,24 @@ export default function Home() {
     };
     setGift(normalized); setDraftGift(normalized); await copyGiftLink(normalized); setEditorOpen(false);
   };
-  const toggleMusic = () => { const next = melody.toggle(); setMusicPlaying(next); showToast(next ? 'Lagu kejutan diputar ♪' : 'Musik dijeda'); };
+  const toggleMusic = () => {
+    const next = melody.toggle(activeTrack);
+    setMusicPlaying(next);
+    showToast(next ? `${musicTracks[activeTrack].title} diputar ♪` : 'Musik dijeda');
+  };
+  const selectTrack = (trackIndex: number) => {
+    setActiveTrack(trackIndex);
+    if (musicPlaying) melody.play(trackIndex);
+    showToast(`Sekarang memutar ${musicTracks[trackIndex].title} ♪`);
+  };
+  const changeTrack = (direction: number) => selectTrack((activeTrack + direction + musicTracks.length) % musicTracks.length);
+  const acceptBouquet = () => {
+    const started = melody.play(activeTrack);
+    setMusicPlaying(started);
+    setMusicUnlocked(true);
+    moveTo('crowd');
+    showToast(`${musicTracks[activeTrack].title} mulai diputar ♪`);
+  };
   const themeStyle = { '--accent': currentTheme.accent, '--soft': currentTheme.soft, '--ink': currentTheme.ink, '--glow': currentTheme.glow } as React.CSSProperties;
   const ambient = useMemo(() => floatingMotifs.map((motif) => (
     <span className="ambient-motif" key={motif.id} style={{ left: motif.left, top: motif.top, animationDelay: motif.delay }}>{motif.icon}</span>
@@ -336,8 +383,18 @@ export default function Home() {
       </div>
       <header className="journey-controls">
         {stage !== 'intro' ? <button className="round-control" onClick={returnToStart} aria-label="Kembali ke awal">←</button> : <span className="tiny-brand">made for you ♥</span>}
-        {stage !== 'intro' && <div><button className="soft-control" onClick={openEditor}>Edit hadiah</button><button className="round-control" onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? '♪' : '♫'}</button></div>}
+        {stage !== 'intro' && <div><button className="soft-control" onClick={openEditor}>Edit hadiah</button></div>}
       </header>
+
+      {musicUnlocked && (
+        <aside className="music-dock" aria-label="Pemutar musik hadiah">
+          <button className="music-skip" onClick={() => changeTrack(-1)} aria-label="Lagu sebelumnya">‹</button>
+          <button className={`music-toggle ${musicPlaying ? 'playing' : ''}`} onClick={toggleMusic} aria-label={musicPlaying ? 'Jeda musik' : 'Putar musik'}>{musicPlaying ? 'Ⅱ' : '▶'}</button>
+          <div className="music-copy"><span>{musicPlaying ? 'now playing' : 'music paused'}</span><strong>{musicTracks[activeTrack].title}</strong><small>{musicTracks[activeTrack].mood}</small></div>
+          <button className="music-skip" onClick={() => changeTrack(1)} aria-label="Lagu berikutnya">›</button>
+          <div className="music-track-dots" aria-label="Pilih musik">{musicTracks.map((track, index) => <button className={activeTrack === index ? 'active' : ''} onClick={() => selectTrack(index)} key={track.title} aria-label={`Putar ${track.title}`} aria-pressed={activeTrack === index} />)}</div>
+        </aside>
+      )}
 
       {stage === 'intro' && (
         <section className="intro-stage stage-screen">
@@ -373,7 +430,7 @@ export default function Home() {
         </section>
       )}
 
-      {stage === 'gift' && <section className="gift-stage stage-screen"><div className="sky-sparkles">{ambient}</div><div className="gift-copy"><span className="eyebrow">you did it, {gift.nickname}!</span><h2>A bouquet<br /><em>just for you.</em></h2><p>Setiap bunga membawa satu doa baik untuk tahun barumu.</p><button className="journey-cta" onClick={() => moveTo('crowd')}>Terima buketnya →</button></div><img className="gift-bouquet" src="/journey/birthday-bouquet.webp" alt="Buket bunga hadiah" decoding="async" /><img className="gift-mascot" src="/journey/otter-catcher.webp" alt="Momo memberikan buket" decoding="async" /></section>}
+      {stage === 'gift' && <section className="gift-stage stage-screen"><div className="sky-sparkles">{ambient}</div><div className="gift-copy"><span className="eyebrow">you did it, {gift.nickname}!</span><h2>A bouquet<br /><em>just for you.</em></h2><p>Setiap bunga membawa satu doa baik untuk tahun barumu.</p><button className="journey-cta" onClick={acceptBouquet}>Terima buketnya →</button></div><img className="gift-bouquet" src="/journey/birthday-bouquet.webp" alt="Buket bunga hadiah" decoding="async" /><img className="gift-mascot" src="/journey/otter-catcher.webp" alt="Momo memberikan buket" decoding="async" /></section>}
 
       {stage === 'crowd' && <section className="crowd-stage stage-screen"><div className="mascot-crowd" aria-hidden="true">{Array.from({ length: 15 }, (_, index) => <img key={index} src="/journey/mascot-couple.webp" alt="" decoding="async" style={{ '--crowd-delay': `${(index % 5) * -0.18}s`, '--crowd-rotate': `${(index % 3 - 1) * 5}deg` } as React.CSSProperties} />)}</div><button className="envelope-reveal" onClick={() => moveTo('story')}><span className="envelope-icon">✉</span><strong>We have one more thing</strong><small>ketuk untuk membuka surat</small></button></section>}
 
