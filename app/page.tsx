@@ -28,10 +28,10 @@ const defaultGift: GiftData = {
   wish: 'Semoga semua yang sedang kamu perjuangkan perlahan menemukan jalannya menuju kamu.',
   theme: 'blush',
   photos: [
-    { src: '/memories/hero.jpg', caption: 'Senyum favorit yang selalu bikin tenang.' },
-    { src: '/memories/memory-2.jpg', caption: 'Hari sederhana yang berubah jadi kenangan.' },
-    { src: '/memories/memory-3.jpg', caption: 'Main character di setiap cerita kita.' },
-    { src: '/memories/memory-4.jpg', caption: 'Masih banyak petualangan yang menunggu.' },
+    { src: '/memories/hero.webp', caption: 'Senyum favorit yang selalu bikin tenang.' },
+    { src: '/memories/memory-2.webp', caption: 'Hari sederhana yang berubah jadi kenangan.' },
+    { src: '/memories/memory-3.webp', caption: 'Main character di setiap cerita kita.' },
+    { src: '/memories/memory-4.webp', caption: 'Masih banyak petualangan yang menunggu.' },
   ],
 };
 
