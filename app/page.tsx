@@ -359,7 +359,7 @@ export default function Home() {
   )), []);
 
   return (
-    <main className={`journey-root theme-${gift.theme}`} style={themeStyle}>
+    <main className={`journey-root theme-${gift.theme}${stage === 'story' ? ' stage-story' : ''}`} style={themeStyle}>
       {toast && <div className="journey-toast" role="status">{toast}</div>}
       <div className={`flower-curtain ${transitioning ? 'active' : ''}`} aria-hidden="true">
         <div className="flower-transition-backdrop" />

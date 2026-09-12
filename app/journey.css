@@ -158,6 +158,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .envelope-reveal small { margin-top: 7px; font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
 
 .story-stage { position: relative; min-height: 100svh; padding-bottom: 92px; background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 72%, white)); }
+/* Fix: saat stage story, journey-root harus bisa di-scroll (override overflow: hidden) */
+.journey-root.stage-story {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
 .story-ambient { position: fixed; z-index: 1; inset: 0; pointer-events: none; }
 .story-section { position: relative; z-index: 3; min-height: 100svh; padding: 100px 24px; }
 .story-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
