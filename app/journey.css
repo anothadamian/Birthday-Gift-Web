@@ -76,7 +76,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .scroll-cue { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); color: var(--accent); font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
 @keyframes bouquet-float { 50% { transform: translateY(-12px) rotate(1deg); } }
 
-.flower-curtain { position: fixed; z-index: 1000; inset: 0; overflow: hidden; pointer-events: none; visibility: hidden; }
+.flower-curtain { position: fixed; z-index: 1000; inset: 0; overflow: hidden; contain: strict; isolation: isolate; pointer-events: none; visibility: hidden; }
 .flower-curtain.active { visibility: visible; }
 .flower-transition-backdrop { position: absolute; inset: 0; opacity: 0; background: #f4c8d2; }
 .flower-curtain.active .flower-transition-backdrop { animation: flower-backdrop-cover 1.42s ease both; }
@@ -91,6 +91,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   opacity: 0;
   transform: translate(-50%, -50%) scale(.03) rotate(0deg);
   filter: drop-shadow(0 10px 16px rgba(96, 38, 58, .13));
+  backface-visibility: hidden;
   will-change: transform, opacity;
 }
 .flower-curtain.active .transition-bloom {
@@ -161,9 +162,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .story-stage { position: relative; min-height: 100svh; padding-bottom: 92px; background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 72%, white)); }
 /* Fix: saat stage story, journey-root harus bisa di-scroll (override overflow: hidden) */
 .journey-root.stage-story {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow-x: hidden;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .story-ambient { position: fixed; z-index: 1; inset: 0; pointer-events: none; }
 .story-section { position: relative; z-index: 3; min-height: 100svh; padding: 100px 24px; }
@@ -248,7 +253,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .theme-picker { justify-content: center; }
   .theme-picker { margin-bottom: 18px; }
   .scroll-cue { display: none; }
-  .transition-bloom { width: clamp(170px, 36vmax, 280px); }
+  .flower-curtain.active .flower-transition-backdrop { animation-duration: 1.2s; }
+  .transition-bloom {
+    width: clamp(180px, 39vmax, 300px);
+    filter: none;
+  }
+  .transition-bloom:nth-of-type(even) { display: none; }
+  .flower-curtain.active .transition-bloom { animation-duration: 1.12s; }
   .game-hud { top: 70px; }
   .catcher { width: 128px; bottom: 30px; }
   .catcher img { height: 170px; }
