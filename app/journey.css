@@ -122,7 +122,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 }
 
 .game-stage, .gift-stage { background: url('/journey/dream-valley.webp') center/cover no-repeat; }
-.game-stage { touch-action: none; }
+.game-stage {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  touch-action: none;
+}
 .game-hud { position: absolute; z-index: 20; top: 78px; left: 50%; width: min(520px, calc(100% - 32px)); padding: 10px 16px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.7); border-radius: 17px; background: rgba(255,255,255,.82); box-shadow: 0 10px 30px rgba(45,96,122,.12); text-align: center; backdrop-filter: blur(12px); }
 .game-hud p { margin: 0 0 6px; color: #526779; font-size: 12px; }
 .game-hud div { display: flex; justify-content: center; gap: 24px; color: #b32e59; font-family: var(--mono); font-size: 12px; font-weight: 600; }
