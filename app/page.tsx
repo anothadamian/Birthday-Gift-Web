@@ -23,18 +23,18 @@ interface GiftData {
 interface FallingItem { id: number; x: number; y: number; icon: string; }
 
 const defaultGift: GiftData = {
-  name: 'Naya', nickname: 'Nay', from: 'Rara',
+  name: 'Naya', nickname: 'Nay', from: 'Ken',
   password: '1209', passwordHint: 'Tanggal dan bulan ulang tahunmu — format DDMM.',
-  intro: 'Ada kejutan kecil yang dibuat khusus untukmu.',
-  message: 'Selamat ulang tahun untuk seseorang yang selalu berhasil membuat hari biasa terasa lebih hangat. Semoga langkahmu tahun ini dipenuhi cerita baru, tawa yang tulus, dan orang-orang yang selalu memilih tinggal.',
-  ending: 'Terima kasih sudah hadir dan tumbuh menjadi dirimu yang sekarang. Dunia lebih indah karena ada kamu.',
-  wish: 'Semoga semua yang sedang kamu perjuangkan perlahan menemukan jalannya menuju kamu.',
+  intro: 'Naya, ada kejutan kecil dari Ken yang dibuat khusus untuk hari spesialmu.',
+  message: 'Selamat ulang tahun, Naya. Terima kasih sudah menjadi perempuan yang selalu berhasil membuat hari-hariku terasa lebih hangat. Aku mungkin tidak selalu pandai merangkai kata, tapi aku ingin kamu tahu kalau hadirnya kamu adalah salah satu hal terbaik dalam hidupku. Semoga di umur yang baru ini kamu selalu dikelilingi kebahagiaan, dimudahkan dalam setiap langkah, dan tidak pernah lupa betapa berharganya dirimu untukku.',
+  ending: 'Kalau suatu hari kamu lupa betapa berharganya dirimu, semoga hadiah kecil dari Ken ini bisa mengingatkanmu bahwa kamu selalu dicintai.',
+  wish: 'Semoga semua impianmu menemukan jalan untuk menjadi nyata, hatimu selalu dijaga, dan aku masih boleh menemani banyak ulang tahunmu setelah ini.',
   theme: 'blush',
   photos: [
-    { src: '/memories/hero.webp', caption: 'Senyum favorit yang selalu bikin tenang.' },
-    { src: '/memories/memory-2.webp', caption: 'Hari sederhana yang berubah jadi kenangan.' },
-    { src: '/memories/memory-3.webp', caption: 'Main character di setiap cerita kita.' },
-    { src: '/memories/memory-4.webp', caption: 'Masih banyak petualangan yang menunggu.' },
+    { src: '/memories/ken-naya-couple.jpg', caption: 'Kalau ada kamu, tempat mana pun terasa seperti rumah.' },
+    { src: '/memories/naya-portrait.jpg', caption: 'Cantikmu selalu berhasil membuatku berhenti sebentar.' },
+    { src: '/memories/naya-smile-one.jpeg', caption: 'Tatapan yang diam-diam selalu aku rindukan.' },
+    { src: '/memories/naya-smile-two.jpeg', caption: 'Senyum ini yang ingin terus aku jaga.' },
   ],
 };
 
