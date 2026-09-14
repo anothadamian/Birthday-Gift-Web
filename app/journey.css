@@ -12,6 +12,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .journey-controls { position: fixed; z-index: 70; top: 18px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
 .journey-controls > * { pointer-events: auto; }
 .journey-controls > div { display: flex; gap: 8px; }
+.journey-controls .round-control,
+.journey-controls .soft-control { display: none; }
 .tiny-brand { padding: 10px 15px; border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--soft) 84%, transparent); font-family: var(--serif); font-size: 14px; font-style: italic; backdrop-filter: blur(14px); }
 .round-control, .soft-control { min-height: 42px; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); background: color-mix(in srgb, var(--soft) 84%, transparent); box-shadow: 0 8px 26px rgba(68, 28, 44, .08); backdrop-filter: blur(14px); }
 .round-control { width: 42px; border-radius: 50%; font-size: 18px; }
