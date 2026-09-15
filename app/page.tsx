@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-type JourneyStage = 'intro' | 'game' | 'gift' | 'crowd' | 'story';
+type JourneyStage = 'intro' | 'game' | 'gift' | 'story';
 type ThemeId = 'blush' | 'lilac' | 'sage' | 'midnight';
 
 interface GiftData {
@@ -170,6 +170,7 @@ export default function Home() {
   const [passwordError, setPasswordError] = useState(false);
   const [letterOpen, setLetterOpen] = useState(false);
   const [wishOpen, setWishOpen] = useState(false);
+  const [giftOpened, setGiftOpened] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(7);
@@ -226,6 +227,7 @@ export default function Home() {
   }, [transitioning]);
   const startGame = () => {
     setScore(0); setLives(7); setTimeLeft(35); setPlayerX(50); setFallingItems([]);
+    setGiftOpened(false);
     wonRef.current = false; setPlaying(true);
   };
   const unlockGift = (event: React.FormEvent<HTMLFormElement>) => {
@@ -254,6 +256,7 @@ export default function Home() {
     setFallingItems([]);
     setPasswordInput('');
     setPasswordError(false);
+    setGiftOpened(false);
     moveTo('intro');
   };
   const movePlayer = useCallback((amount: number) => {
@@ -346,11 +349,16 @@ export default function Home() {
     showToast(`Sekarang memutar ${musicTracks[trackIndex].title} ♪`);
   };
   const changeTrack = (direction: number) => selectTrack((activeTrack + direction + musicTracks.length) % musicTracks.length);
+  const openGift = () => {
+    if (giftOpened) return;
+    setGiftOpened(true);
+    melody.sparkle();
+  };
   const acceptBouquet = () => {
     const started = melody.play(activeTrack);
     setMusicPlaying(started);
     setMusicUnlocked(true);
-    moveTo('crowd');
+    moveTo('story');
     showToast(`${musicTracks[activeTrack].title} mulai diputar ♪`);
   };
   const themeStyle = { '--accent': currentTheme.accent, '--soft': currentTheme.soft, '--ink': currentTheme.ink, '--glow': currentTheme.glow } as React.CSSProperties;
@@ -426,13 +434,32 @@ export default function Home() {
         </section>
       )}
 
-      {stage === 'gift' && <section className="gift-stage stage-screen"><div className="sky-sparkles">{ambient}</div><div className="gift-copy"><span className="eyebrow">you did it, {gift.nickname}!</span><h2>A bouquet<br /><em>just for you.</em></h2><p>Setiap bunga membawa satu doa baik untuk tahun barumu.</p><button className="journey-cta" onClick={acceptBouquet}>Terima buketnya →</button></div><img className="gift-bouquet" src="/journey/birthday-bouquet.webp" alt="Buket bunga hadiah" decoding="async" /><img className="gift-mascot" src="/journey/otter-catcher.webp" alt="Momo memberikan buket" decoding="async" /></section>}
-
-      {stage === 'crowd' && <section className="crowd-stage stage-screen"><div className="mascot-crowd" aria-hidden="true">{Array.from({ length: 15 }, (_, index) => <img key={index} src="/journey/mascot-couple.webp" alt="" decoding="async" style={{ '--crowd-delay': `${(index % 5) * -0.18}s`, '--crowd-rotate': `${(index % 3 - 1) * 5}deg` } as React.CSSProperties} />)}</div><button className="envelope-reveal" onClick={() => moveTo('story')}><span className="envelope-icon">✉</span><strong>We have one more thing</strong><small>ketuk untuk membuka surat</small></button></section>}
+      {stage === 'gift' && (
+        <section className={`gift-stage stage-screen ${giftOpened ? 'gift-opened' : ''}`}>
+          <div className="sky-sparkles">{ambient}</div>
+          <div className="gift-reveal">
+            <span className="eyebrow">you did it, {gift.nickname}!</span>
+            <h2>{giftOpened ? <>A bouquet <em>just for you.</em></> : <>A little gift <em>for you.</em></>}</h2>
+            <div className="gift-box-scene">
+              <img className="gift-bouquet" src="/journey/birthday-bouquet.webp" alt={giftOpened ? 'Buket bunga muncul dari kotak hadiah' : ''} decoding="async" />
+              <button className="gift-box" type="button" onClick={openGift} disabled={giftOpened} aria-label="Buka kotak hadiah" aria-expanded={giftOpened}>
+                <span className="gift-box-lid" aria-hidden="true"><i /></span>
+                <span className="gift-box-body" aria-hidden="true"><i /></span>
+                {!giftOpened && <strong>Buka hadiah</strong>}
+              </button>
+            </div>
+            <div className="gift-reveal-copy" aria-live="polite">
+              {giftOpened
+                ? <><p>Setiap bunga membawa satu doa baik untuk tahun barumu.</p><button className="journey-cta" onClick={acceptBouquet}>Terima buketnya →</button></>
+                : <p>Ketuk kotaknya untuk melihat kejutanmu.</p>}
+            </div>
+          </div>
+        </section>
+      )}
 
       {stage === 'story' && (
         <div className="story-stage"><div className="story-ambient" aria-hidden="true">{ambient}</div>
-          <section className="story-hero story-section"><img src="/journey/mascot-couple.webp" alt="Momo dan Lili membawa surat" loading="lazy" decoding="async" /><span className="eyebrow">for someone very special</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Scroll pelan-pelan. Ada cerita kecil yang dibuat khusus untukmu.</p><span className="down-arrow">↓</span></section>
+          <section className="story-hero story-section"><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1></section>
           <section className="letter-scene story-section"><div className={`letter-card ${letterOpen ? 'open' : ''}`}><button className="wax-heart" onClick={() => setLetterOpen(true)} disabled={letterOpen} aria-label="Buka surat cinta">♥</button><span className="eyebrow">a letter from {gift.from}</span><h2>{letterOpen ? `Dear ${gift.nickname},` : 'Ada surat untukmu'}</h2>{letterOpen ? <><p className="letter-message">“{gift.message}”</p><p className="signature">with all my love,<br />{gift.from}</p></> : <p>Tekan segel hati untuk membuka pesan.</p>}</div></section>
           <section className="memory-story story-section"><div className="story-heading"><span className="eyebrow">our little archive</span><h2>Potongan waktu<br />yang ingin kusimpan.</h2></div><div className="memory-column">{gift.photos.map((photo, index) => <figure className={index % 2 ? 'tilt-right' : 'tilt-left'} key={index}><img src={photo.src} alt={photo.caption} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultGift.photos[index].src; }} /><figcaption><span>0{index + 1}</span>{photo.caption}</figcaption></figure>)}</div></section>
           <section className="wish-scene story-section"><img src="/journey/birthday-bouquet.webp" alt="Buket penutup" loading="lazy" decoding="async" /><span className="eyebrow">one last wish</span><h2>{gift.ending}</h2>{wishOpen ? <p className="wish-reveal">“{gift.wish}”</p> : <button className="journey-cta" onClick={() => { setWishOpen(true); melody.sparkle(); }}>Buka doa rahasia ✦</button>}<div className="ending-actions"><button onClick={() => setStoryPreview(true)}>Preview untuk Story</button><button onClick={() => copyGiftLink()}>Salin link hadiah</button><button onClick={returnToStart}>Ulangi dari awal</button></div></section>
