@@ -168,9 +168,12 @@ export default function Home() {
   const [toast, setToast] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
-  const [letterOpen, setLetterOpen] = useState(false);
-  const [wishOpen, setWishOpen] = useState(false);
   const [giftOpened, setGiftOpened] = useState(false);
+  const [openedPetals, setOpenedPetals] = useState<number[]>([]);
+  const [flippedMemories, setFlippedMemories] = useState<number[]>([]);
+  const [openEnvelope, setOpenEnvelope] = useState<number | null>(null);
+  const [candleProgress, setCandleProgress] = useState(0);
+  const [candleBlown, setCandleBlown] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(7);
@@ -179,12 +182,16 @@ export default function Home() {
   const [fallingItems, setFallingItems] = useState<FallingItem[]>([]);
   const playerXRef = useRef(playerX);
   const wonRef = useRef(false);
+  const candleTimerRef = useRef<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const currentTheme = themes[gift.theme];
 
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
-  useEffect(() => () => melody.pause(), []);
+  useEffect(() => () => {
+    melody.pause();
+    if (candleTimerRef.current !== null) window.clearInterval(candleTimerRef.current);
+  }, []);
   useEffect(() => {
     document.body.style.overflow = editorOpen || storyPreview ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -237,8 +244,8 @@ export default function Home() {
       return;
     }
     setPasswordError(false);
-    startGame();
-    moveTo('game');
+    setGiftOpened(false);
+    moveTo('gift');
   };
   const addPasswordDigit = (digit: string) => {
     setPasswordInput((value) => `${value}${digit}`.slice(0, 4));
@@ -257,6 +264,11 @@ export default function Home() {
     setPasswordInput('');
     setPasswordError(false);
     setGiftOpened(false);
+    setOpenedPetals([]);
+    setFlippedMemories([]);
+    setOpenEnvelope(null);
+    setCandleProgress(0);
+    setCandleBlown(false);
     moveTo('intro');
   };
   const movePlayer = useCallback((amount: number) => {
@@ -301,7 +313,7 @@ export default function Home() {
       wonRef.current = true;
       const finishWin = window.setTimeout(() => {
         setPlaying(false); setFallingItems([]); melody.sparkle();
-        window.setTimeout(() => moveTo('gift'), 450);
+        window.setTimeout(() => moveTo('story'), 450);
       }, 0);
       return () => window.clearTimeout(finishWin);
     }
@@ -358,8 +370,38 @@ export default function Home() {
     const started = melody.play(activeTrack);
     setMusicPlaying(started);
     setMusicUnlocked(true);
-    moveTo('story');
+    startGame();
+    moveTo('game');
     showToast(`${musicTracks[activeTrack].title} mulai diputar ♪`);
+  };
+  const revealPetal = (index: number) => {
+    setOpenedPetals((current) => current.includes(index) ? current : [...current, index]);
+    melody.sparkle();
+  };
+  const flipMemory = (index: number) => {
+    setFlippedMemories((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
+  };
+  const stopCandleHold = (reset = true) => {
+    if (candleTimerRef.current !== null) {
+      window.clearInterval(candleTimerRef.current);
+      candleTimerRef.current = null;
+    }
+    if (reset) setCandleProgress((current) => current >= 100 ? current : 0);
+  };
+  const startCandleHold = () => {
+    if (candleBlown || candleTimerRef.current !== null) return;
+    candleTimerRef.current = window.setInterval(() => {
+      setCandleProgress((current) => {
+        const next = Math.min(100, current + 4);
+        if (next >= 100) {
+          if (candleTimerRef.current !== null) window.clearInterval(candleTimerRef.current);
+          candleTimerRef.current = null;
+          setCandleBlown(true);
+          melody.sparkle();
+        }
+        return next;
+      });
+    }, 45);
   };
   const themeStyle = { '--accent': currentTheme.accent, '--soft': currentTheme.soft, '--ink': currentTheme.ink, '--glow': currentTheme.glow } as React.CSSProperties;
   const ambient = useMemo(() => floatingMotifs.map((motif) => (
@@ -426,10 +468,10 @@ export default function Home() {
 
       {stage === 'game' && (
         <section className="game-stage stage-screen" onPointerMove={(event) => { if (!playing) return; const rect = event.currentTarget.getBoundingClientRect(); setPlayerX(Math.max(7, Math.min(93, ((event.clientX - rect.left) / rect.width) * 100))); }}>
-          <div className="game-hud" aria-live="polite"><p>Help Momo prepare a surprise for {gift.nickname}</p><div><span>♥ {score}/8</span><span>♡ {lives}</span><span>{timeLeft}s</span></div></div>
+          <div className="game-hud" aria-live="polite"><p>Bantu Momo mengumpulkan bunga untuk cerita {gift.nickname}</p><div><span>♥ {score}/8</span><span>♡ {lives}</span><span>{timeLeft}s</span></div></div>
           {fallingItems.map((item) => <span aria-hidden="true" className={`journey-falling-item ${item.icon === '♥' ? 'heart' : ''}`} key={item.id} style={{ left: `${item.x}%`, top: `${item.y}%` }}>{item.icon}</span>)}
           <div className="catcher" style={{ left: `${playerX}%` }}><img src="/journey/otter-catcher.webp" alt="Momo si berang-berang membawa keranjang" decoding="async" /></div>
-          {!playing && score < 8 && <div className="game-start-card"><span>{lives <= 0 || timeLeft <= 0 ? 'almost!' : 'mini game'}</span><h2>{lives <= 0 || timeLeft <= 0 ? 'Coba sekali lagi?' : 'Catch the sweet things'}</h2><p>Gerakkan Momo dengan tombol, A/D, atau geser jari. Tangkap 8 hadiah sebelum waktunya habis.</p><div className="game-card-actions"><button className="journey-cta" onClick={startGame}>{lives <= 0 || timeLeft <= 0 ? 'Main lagi ↻' : 'Mulai main →'}</button><button className="skip-game" onClick={() => moveTo('gift')}>Lewati game</button></div></div>}
+          {!playing && score < 8 && <div className="game-start-card"><span>{lives <= 0 || timeLeft <= 0 ? 'almost!' : 'mini game'}</span><h2>{lives <= 0 || timeLeft <= 0 ? 'Coba sekali lagi?' : 'Catch the sweet things'}</h2><p>Gerakkan Momo dengan tombol, A/D, atau geser jari. Tangkap 8 hadiah sebelum waktunya habis.</p><div className="game-card-actions"><button className="journey-cta" onClick={startGame}>{lives <= 0 || timeLeft <= 0 ? 'Main lagi ↻' : 'Mulai main →'}</button><button className="skip-game" onClick={() => moveTo('story')}>Lanjut ke cerita</button></div></div>}
           <div className="game-move-controls"><button onClick={() => movePlayer(-10)} disabled={!playing} aria-label="Gerak ke kiri">←</button><span>geser di layar · A / D</span><button onClick={() => movePlayer(10)} disabled={!playing} aria-label="Gerak ke kanan">→</button></div>
         </section>
       )}
@@ -459,10 +501,57 @@ export default function Home() {
 
       {stage === 'story' && (
         <div className="story-stage"><div className="story-ambient" aria-hidden="true">{ambient}</div>
-          <section className="story-hero story-section"><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1></section>
-          <section className="letter-scene story-section"><div className={`letter-card ${letterOpen ? 'open' : ''}`}><button className="wax-heart" onClick={() => setLetterOpen(true)} disabled={letterOpen} aria-label="Buka surat cinta">♥</button><span className="eyebrow">a letter from {gift.from}</span><h2>{letterOpen ? `Dear ${gift.nickname},` : 'Ada surat untukmu'}</h2>{letterOpen ? <><p className="letter-message">“{gift.message}”</p><p className="signature">with all my love,<br />{gift.from}</p></> : <p>Tekan segel hati untuk membuka pesan.</p>}</div></section>
-          <section className="memory-story story-section"><div className="story-heading"><span className="eyebrow">our little archive</span><h2>Potongan waktu<br />yang ingin kusimpan.</h2></div><div className="memory-column">{gift.photos.map((photo, index) => <figure className={index % 2 ? 'tilt-right' : 'tilt-left'} key={index}><img src={photo.src} alt={photo.caption} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultGift.photos[index].src; }} /><figcaption><span>0{index + 1}</span>{photo.caption}</figcaption></figure>)}</div></section>
-          <section className="wish-scene story-section"><img src="/journey/birthday-bouquet.webp" alt="Buket penutup" loading="lazy" decoding="async" /><span className="eyebrow">one last wish</span><h2>{gift.ending}</h2>{wishOpen ? <p className="wish-reveal">“{gift.wish}”</p> : <button className="journey-cta" onClick={() => { setWishOpen(true); melody.sparkle(); }}>Buka doa rahasia ✦</button>}<div className="ending-actions"><button onClick={() => setStoryPreview(true)}>Preview untuk Story</button><button onClick={() => copyGiftLink()}>Salin link hadiah</button><button onClick={returnToStart}>Ulangi dari awal</button></div></section>
+          <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Scroll pelan-pelan, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
+
+          <section className="petal-story story-section">
+            <div className="interactive-heading"><span className="eyebrow">01 · pick a flower</span><h2>Petik empat bunga<br />dari {gift.from}.</h2><p>Setiap bunga menyimpan satu hal yang ingin aku katakan kepadamu.</p></div>
+            <div className="petal-bouquet">
+              <img src="/journey/birthday-bouquet.webp" alt="Buket dengan empat bunga yang bisa dipetik" loading="lazy" decoding="async" />
+              {[
+                `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}.`,
+                'Senyummu selalu punya cara sendiri untuk menenangkan hariku.',
+                'Aku bangga melihatmu terus tumbuh menjadi perempuan yang hebat.',
+                `Terima kasih sudah menjadi tempat pulang paling hangat untuk ${gift.from}.`,
+              ].map((message, index) => (
+                <button className={`petal-button petal-${index + 1} ${openedPetals.includes(index) ? 'picked' : ''}`} key={message} onClick={() => revealPetal(index)} aria-label={`Petik bunga ${index + 1}`} aria-pressed={openedPetals.includes(index)}><span>✿</span></button>
+              ))}
+            </div>
+            <div className="petal-message" aria-live="polite">
+              {openedPetals.length ? <><span>{String(openedPetals.length).padStart(2, '0')} / 04</span><p>{[
+                `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}.`,
+                'Senyummu selalu punya cara sendiri untuk menenangkan hariku.',
+                'Aku bangga melihatmu terus tumbuh menjadi perempuan yang hebat.',
+                `Terima kasih sudah menjadi tempat pulang paling hangat untuk ${gift.from}.`,
+              ][openedPetals[openedPetals.length - 1]]}</p></> : <p>Sentuh salah satu bunga yang berkilau.</p>}
+            </div>
+          </section>
+
+          <section className="memory-play story-section">
+            <div className="interactive-heading"><span className="eyebrow">02 · flip our memories</span><h2>Balik polaroidnya.</h2><p>Ada tulisan kecil di belakang setiap foto kita.</p></div>
+            <div className="polaroid-deck">{gift.photos.map((photo, index) => <button className={`flip-polaroid polaroid-${index + 1} ${flippedMemories.includes(index) ? 'flipped' : ''}`} key={index} onClick={() => flipMemory(index)} aria-label={`${flippedMemories.includes(index) ? 'Lihat foto' : 'Baca pesan'} kenangan ${index + 1}`} aria-pressed={flippedMemories.includes(index)}><span className="polaroid-inner"><span className="polaroid-front"><img src={photo.src} alt={photo.caption} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultGift.photos[index].src; }} /><small>ketuk untuk membalik ↻</small></span><span className="polaroid-back"><span>0{index + 1}</span><p>{photo.caption}</p><small>— {gift.from}</small></span></span></button>)}</div>
+          </section>
+
+          <section className="envelope-story story-section">
+            <div className="interactive-heading"><span className="eyebrow">03 · choose a letter</span><h2>Pilih satu amplop.</h2><p>Boleh dibuka semuanya, tapi pilih yang paling kamu butuhkan dulu.</p></div>
+            <div className="envelope-row">{[
+              { title: 'Kalau kamu sedih', text: `Kamu tidak harus selalu terlihat kuat, ${gift.nickname}. Cerita saja kepadaku, aku akan mendengarkan.` },
+              { title: 'Kalau kamu kangen', text: 'Ingat, jarak hanya mengubah tempat kita berdiri—bukan rasa yang aku simpan.' },
+              { title: 'Buka sekarang', text: gift.message },
+            ].map((letter, index) => <button className={`love-envelope ${openEnvelope === index ? 'open' : ''}`} key={letter.title} onClick={() => { setOpenEnvelope(index); melody.sparkle(); }} aria-expanded={openEnvelope === index}><span className="envelope-icon" aria-hidden="true">♡</span><strong>{letter.title}</strong><small>{openEnvelope === index ? 'sudah dibuka' : 'ketuk amplop'}</small></button>)}</div>
+            <div className={`envelope-letter ${openEnvelope !== null ? 'visible' : ''}`} aria-live="polite">{openEnvelope !== null && <><span>Dear {gift.nickname},</span><p>“{[
+              `Kamu tidak harus selalu terlihat kuat, ${gift.nickname}. Cerita saja kepadaku, aku akan mendengarkan.`,
+              'Ingat, jarak hanya mengubah tempat kita berdiri—bukan rasa yang aku simpan.',
+              gift.message,
+            ][openEnvelope]}”</p><small>with all my love, {gift.from}</small></>}</div>
+          </section>
+
+          <section className={`candle-story story-section ${candleBlown ? 'wish-made' : ''}`}>
+            <div className="interactive-heading"><span className="eyebrow">04 · make a wish</span><h2>{candleBlown ? 'Doamu sudah terbang ✦' : 'Tutup mata, lalu buat harapan.'}</h2><p>{candleBlown ? 'Semoga semesta mendengar semuanya.' : 'Tahan tombol lilinnya sampai apinya padam.'}</p></div>
+            <div className="birthday-cake" aria-hidden="true"><span className="cake-flame" /><span className="cake-candle" /><span className="cake-top">♡ · ♡ · ♡</span><span className="cake-layer cake-layer-one" /><span className="cake-layer cake-layer-two" /></div>
+            <button className="candle-hold" style={{ '--wish-progress': `${candleProgress}%` } as React.CSSProperties} onPointerDown={startCandleHold} onPointerUp={() => stopCandleHold()} onPointerLeave={() => stopCandleHold()} onPointerCancel={() => stopCandleHold()} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') startCandleHold(); }} onKeyUp={(event) => { if (event.key === 'Enter' || event.key === ' ') stopCandleHold(); }} disabled={candleBlown} aria-label="Tahan untuk meniup lilin"><span>{candleBlown ? '✓' : '♥'}</span><strong>{candleBlown ? 'Wish made' : 'Tahan di sini'}</strong></button>
+            {candleBlown && <div className="final-wish"><p>{gift.ending}</p><blockquote>“{gift.wish}”</blockquote><span>— {gift.from}</span></div>}
+            {candleBlown && <div className="ending-actions"><button onClick={() => setStoryPreview(true)}>Preview untuk Story</button><button onClick={() => copyGiftLink()}>Salin link hadiah</button><button onClick={returnToStart}>Ulangi dari awal</button></div>}
+          </section>
         </div>
       )}
 
