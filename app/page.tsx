@@ -32,8 +32,8 @@ const defaultGift: GiftData = {
   theme: 'blush',
   photos: [
     { src: '/memories/ken-naya-couple.jpg', caption: 'Kalau ada kamu, tempat mana pun terasa seperti rumah.' },
-    { src: '/memories/naya-portrait.jpg', caption: 'Cantikmu selalu berhasil membuatku berhenti sebentar.' },
-    { src: '/memories/naya-smile-one.jpeg', caption: 'Tatapan yang diam-diam selalu aku rindukan.' },
+    { src: '/memories/new.jpeg', caption: 'Cantikmu selalu berhasil membuatku berhenti sebentar.' },
+    { src: '/memories/new2.jpeg', caption: 'Tatapan yang diam-diam selalu aku rindukan.' },
     { src: '/memories/naya-smile-two.jpeg', caption: 'Senyum ini yang ingin terus aku jaga.' },
   ],
 };
@@ -169,7 +169,7 @@ export default function Home() {
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [giftOpened, setGiftOpened] = useState(false);
-  const [openedPetals, setOpenedPetals] = useState<number[]>([]);
+  const [loveProgress, setLoveProgress] = useState(0);
   const [flippedMemories, setFlippedMemories] = useState<number[]>([]);
   const [openEnvelope, setOpenEnvelope] = useState<number | null>(null);
   const [candleProgress, setCandleProgress] = useState(0);
@@ -182,6 +182,7 @@ export default function Home() {
   const [fallingItems, setFallingItems] = useState<FallingItem[]>([]);
   const playerXRef = useRef(playerX);
   const wonRef = useRef(false);
+  const loveTimerRef = useRef<number | null>(null);
   const candleTimerRef = useRef<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -190,6 +191,7 @@ export default function Home() {
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
   useEffect(() => () => {
     melody.pause();
+    if (loveTimerRef.current !== null) window.clearInterval(loveTimerRef.current);
     if (candleTimerRef.current !== null) window.clearInterval(candleTimerRef.current);
   }, []);
   useEffect(() => {
@@ -264,7 +266,7 @@ export default function Home() {
     setPasswordInput('');
     setPasswordError(false);
     setGiftOpened(false);
-    setOpenedPetals([]);
+    setLoveProgress(0);
     setFlippedMemories([]);
     setOpenEnvelope(null);
     setCandleProgress(0);
@@ -307,13 +309,22 @@ export default function Home() {
     return () => { window.clearInterval(spawn); window.clearInterval(fall); window.clearInterval(timer); };
   }, [playing, stage]);
 
+  const continueToStory = useCallback(() => {
+    const started = melody.play(activeTrack);
+    setMusicPlaying(started);
+    setMusicUnlocked(true);
+    moveTo('story');
+    setToast(`${musicTracks[activeTrack].title} mulai diputar ♪`);
+    window.setTimeout(() => setToast(''), 2800);
+  }, [activeTrack, moveTo]);
+
   useEffect(() => {
     if (!playing) return;
     if (score >= 8 && !wonRef.current) {
       wonRef.current = true;
       const finishWin = window.setTimeout(() => {
         setPlaying(false); setFallingItems([]); melody.sparkle();
-        window.setTimeout(() => moveTo('story'), 450);
+        window.setTimeout(continueToStory, 450);
       }, 0);
       return () => window.clearTimeout(finishWin);
     }
@@ -321,7 +332,7 @@ export default function Home() {
       const finishGame = window.setTimeout(() => { setPlaying(false); setFallingItems([]); }, 0);
       return () => window.clearTimeout(finishGame);
     }
-  }, [lives, moveTo, playing, score, timeLeft]);
+  }, [continueToStory, lives, playing, score, timeLeft]);
 
   const copyGiftLink = async (data: GiftData = gift) => {
     try {
@@ -367,16 +378,28 @@ export default function Home() {
     melody.sparkle();
   };
   const acceptBouquet = () => {
-    const started = melody.play(activeTrack);
-    setMusicPlaying(started);
-    setMusicUnlocked(true);
     startGame();
     moveTo('game');
-    showToast(`${musicTracks[activeTrack].title} mulai diputar ♪`);
   };
-  const revealPetal = (index: number) => {
-    setOpenedPetals((current) => current.includes(index) ? current : [...current, index]);
-    melody.sparkle();
+  const stopLoveHold = () => {
+    if (loveTimerRef.current !== null) {
+      window.clearInterval(loveTimerRef.current);
+      loveTimerRef.current = null;
+    }
+  };
+  const startLoveHold = () => {
+    if (loveProgress >= 100 || loveTimerRef.current !== null) return;
+    loveTimerRef.current = window.setInterval(() => {
+      setLoveProgress((current) => {
+        const next = Math.min(100, current + 2);
+        if (next >= 100) {
+          if (loveTimerRef.current !== null) window.clearInterval(loveTimerRef.current);
+          loveTimerRef.current = null;
+          melody.sparkle();
+        }
+        return next;
+      });
+    }, 38);
   };
   const flipMemory = (index: number) => {
     setFlippedMemories((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
@@ -471,7 +494,7 @@ export default function Home() {
           <div className="game-hud" aria-live="polite"><p>Bantu Momo mengumpulkan bunga untuk cerita {gift.nickname}</p><div><span>♥ {score}/8</span><span>♡ {lives}</span><span>{timeLeft}s</span></div></div>
           {fallingItems.map((item) => <span aria-hidden="true" className={`journey-falling-item ${item.icon === '♥' ? 'heart' : ''}`} key={item.id} style={{ left: `${item.x}%`, top: `${item.y}%` }}>{item.icon}</span>)}
           <div className="catcher" style={{ left: `${playerX}%` }}><img src="/journey/otter-catcher.webp" alt="Momo si berang-berang membawa keranjang" decoding="async" /></div>
-          {!playing && score < 8 && <div className="game-start-card"><span>{lives <= 0 || timeLeft <= 0 ? 'almost!' : 'mini game'}</span><h2>{lives <= 0 || timeLeft <= 0 ? 'Coba sekali lagi?' : 'Catch the sweet things'}</h2><p>Gerakkan Momo dengan tombol, A/D, atau geser jari. Tangkap 8 hadiah sebelum waktunya habis.</p><div className="game-card-actions"><button className="journey-cta" onClick={startGame}>{lives <= 0 || timeLeft <= 0 ? 'Main lagi ↻' : 'Mulai main →'}</button><button className="skip-game" onClick={() => moveTo('story')}>Lanjut ke cerita</button></div></div>}
+          {!playing && score < 8 && <div className="game-start-card"><span>{lives <= 0 || timeLeft <= 0 ? 'almost!' : 'mini game'}</span><h2>{lives <= 0 || timeLeft <= 0 ? 'Coba sekali lagi?' : 'Catch the sweet things'}</h2><p>Gerakkan Momo dengan tombol, A/D, atau geser jari. Tangkap 8 hadiah sebelum waktunya habis.</p><div className="game-card-actions"><button className="journey-cta" onClick={startGame}>{lives <= 0 || timeLeft <= 0 ? 'Main lagi ↻' : 'Mulai main →'}</button><button className="skip-game" onClick={continueToStory}>Lanjut ke cerita</button></div></div>}
           <div className="game-move-controls"><button onClick={() => movePlayer(-10)} disabled={!playing} aria-label="Gerak ke kiri">←</button><span>geser di layar · A / D</span><button onClick={() => movePlayer(10)} disabled={!playing} aria-label="Gerak ke kanan">→</button></div>
         </section>
       )}
@@ -504,26 +527,13 @@ export default function Home() {
           <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Scroll pelan-pelan, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
 
           <section className="petal-story story-section">
-            <div className="interactive-heading"><span className="eyebrow">01 · pick a flower</span><h2>Petik empat bunga<br />dari {gift.from}.</h2><p>Setiap bunga menyimpan satu hal yang ingin aku katakan kepadamu.</p></div>
-            <div className="petal-bouquet">
-              <img src="/journey/birthday-bouquet.webp" alt="Buket dengan empat bunga yang bisa dipetik" loading="lazy" decoding="async" />
-              {[
-                `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}.`,
-                'Senyummu selalu punya cara sendiri untuk menenangkan hariku.',
-                'Aku bangga melihatmu terus tumbuh menjadi perempuan yang hebat.',
-                `Terima kasih sudah menjadi tempat pulang paling hangat untuk ${gift.from}.`,
-              ].map((message, index) => (
-                <button className={`petal-button petal-${index + 1} ${openedPetals.includes(index) ? 'picked' : ''}`} key={message} onClick={() => revealPetal(index)} aria-label={`Petik bunga ${index + 1}`} aria-pressed={openedPetals.includes(index)}><span>✿</span></button>
-              ))}
+            <div className="interactive-heading"><span className="eyebrow">01 · fill my heart</span><h2>Sebelum lanjut,<br />seberapa penuh hatimu?</h2><p>Tahan hatinya sampai penuh. Jangan dilepas dulu, ya.</p></div>
+            <div className={`love-meter-scene ${loveProgress >= 100 ? 'complete' : ''}`} style={{ '--love-progress': `${loveProgress}%` } as React.CSSProperties}>
+              <img src="/journey/birthday-bouquet.webp" alt="Buket dari Ken untuk Naya" loading="lazy" decoding="async" />
+              <div className="love-percentage" aria-live="polite"><strong>{loveProgress}%</strong><span>{loveProgress >= 100 ? 'You filled my heart ♥' : loveProgress >= 75 ? 'Sedikit lagi...' : loveProgress >= 40 ? 'Makin penuh...' : 'Tahan terus'}</span></div>
+              <button className="love-heart-hold" onPointerDown={startLoveHold} onPointerUp={stopLoveHold} onPointerLeave={stopLoveHold} onPointerCancel={stopLoveHold} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') startLoveHold(); }} onKeyUp={(event) => { if (event.key === 'Enter' || event.key === ' ') stopLoveHold(); }} disabled={loveProgress >= 100} aria-label="Tahan hati sampai seratus persen"><span className="love-heart-fill" aria-hidden="true">♥</span><span className="love-heart-outline" aria-hidden="true">♡</span></button>
             </div>
-            <div className="petal-message" aria-live="polite">
-              {openedPetals.length ? <><span>{String(openedPetals.length).padStart(2, '0')} / 04</span><p>{[
-                `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}.`,
-                'Senyummu selalu punya cara sendiri untuk menenangkan hariku.',
-                'Aku bangga melihatmu terus tumbuh menjadi perempuan yang hebat.',
-                `Terima kasih sudah menjadi tempat pulang paling hangat untuk ${gift.from}.`,
-              ][openedPetals[openedPetals.length - 1]]}</p></> : <p>Sentuh salah satu bunga yang berkilau.</p>}
-            </div>
+            <div className={`petal-message ${loveProgress >= 100 ? 'complete' : ''}`} aria-live="polite"><span>{loveProgress >= 100 ? '100% FOR YOU' : 'HOLD THE HEART'}</span><p>{loveProgress >= 100 ? `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}. Semua bunga ini untukmu.` : 'Isi hatinya untuk membuka pesan kecil dari Ken.'}</p></div>
           </section>
 
           <section className="memory-play story-section">

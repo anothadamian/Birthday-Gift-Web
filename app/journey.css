@@ -203,16 +203,19 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .interactive-heading p { max-width: 520px; margin: auto; color: color-mix(in srgb, var(--ink) 68%, transparent); line-height: 1.7; }
 
 .petal-story { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 56%, color-mix(in srgb, var(--glow) 38%, transparent), transparent 35%); }
-.petal-bouquet { position: relative; width: min(430px, 88vw); }
-.petal-bouquet > img { display: block; width: 100%; max-height: 500px; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(70,31,48,.16)); }
-.petal-button { position: absolute; display: grid; width: 58px; height: 58px; padding: 0; place-items: center; transform: translate(-50%, -50%); border: 1px solid rgba(255,255,255,.88); border-radius: 50%; color: white; background: color-mix(in srgb, var(--accent) 78%, #ffb5cf); box-shadow: 0 0 0 7px rgba(255,255,255,.28), 0 10px 24px rgba(91,30,54,.22); font-size: 28px; animation: petal-pulse 2.2s ease-in-out infinite; }
-.petal-button:hover { transform: translate(-50%, -50%) scale(1.08); }
-.petal-button.picked { color: var(--accent); background: white; animation: petal-picked .55s ease both; }
-.petal-1 { top: 24%; left: 29%; }
-.petal-2 { top: 19%; left: 56%; animation-delay: -.45s; }
-.petal-3 { top: 39%; left: 70%; animation-delay: -.9s; }
-.petal-4 { top: 43%; left: 39%; animation-delay: -1.35s; }
-.petal-message { width: min(560px, 100%); min-height: 120px; margin-top: 24px; padding: 22px 26px; border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 22px; background: color-mix(in srgb, white 86%, var(--soft)); box-shadow: 0 18px 50px rgba(74,35,49,.09); text-align: center; }
+.love-meter-scene { position: relative; display: grid; width: min(470px, 92vw); min-height: 500px; margin: auto; place-items: end center; }
+.love-meter-scene > img { position: absolute; z-index: 1; top: 0; left: 50%; width: min(390px, 82vw); max-height: 400px; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(70,31,48,.16)); opacity: .94; transform: translateX(-50%); }
+.love-percentage { position: absolute; z-index: 3; top: 305px; left: 50%; display: flex; min-width: 170px; padding: 10px 18px; align-items: baseline; justify-content: center; gap: 9px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; background: rgba(255,255,255,.84); box-shadow: 0 12px 30px rgba(71,31,47,.12); backdrop-filter: blur(10px); }
+.love-percentage strong { color: var(--accent); font-family: var(--serif); font-size: 28px; }
+.love-percentage span { color: color-mix(in srgb, var(--ink) 65%, transparent); font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
+.love-heart-hold { position: relative; z-index: 4; width: 126px; height: 116px; padding: 0; overflow: hidden; border: 0; color: var(--accent); background: transparent; filter: drop-shadow(0 12px 20px rgba(116,30,63,.2)); touch-action: none; user-select: none; }
+.love-heart-hold span { position: absolute; inset: 0; display: grid; place-items: center; font-family: Arial, sans-serif; font-size: 116px; line-height: 1; }
+.love-heart-fill { color: var(--accent); clip-path: inset(calc(100% - var(--love-progress)) 0 0); transition: clip-path .08s linear; }
+.love-heart-outline { color: color-mix(in srgb, var(--accent) 74%, white); }
+.love-meter-scene.complete > img { animation: bouquet-celebrate .8s ease both; }
+.love-meter-scene.complete .love-heart-hold { animation: heart-complete .75s ease both; }
+.petal-message { width: min(560px, 100%); min-height: 120px; margin-top: 24px; padding: 22px 26px; border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 22px; background: color-mix(in srgb, white 86%, var(--soft)); box-shadow: 0 18px 50px rgba(74,35,49,.09); text-align: center; transition: transform .6s ease, border-color .6s ease; }
+.petal-message.complete { border-color: color-mix(in srgb, var(--accent) 42%, transparent); transform: translateY(-5px); }
 .petal-message span { color: var(--accent); font-family: var(--mono); font-size: 10px; letter-spacing: .14em; }
 .petal-message p { margin: 8px 0 0; font-family: var(--serif); font-size: clamp(19px, 3vw, 25px); font-style: italic; line-height: 1.45; animation: letter-reveal .5s ease both; }
 
@@ -267,8 +270,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .final-wish blockquote { margin: 24px auto 14px; color: var(--accent); font-family: var(--hand); font-size: clamp(22px, 4vw, 31px); line-height: 1.4; }
 .final-wish > span { color: color-mix(in srgb, var(--ink) 62%, transparent); font-family: var(--mono); font-size: 10px; }
 @keyframes story-cue { 50% { transform: translateY(8px); } }
-@keyframes petal-pulse { 50% { box-shadow: 0 0 0 13px rgba(255,255,255,0), 0 12px 28px rgba(91,30,54,.24); } }
-@keyframes petal-picked { 45% { transform: translate(-50%, -50%) scale(1.28) rotate(18deg); } 100% { transform: translate(-50%, -50%) scale(.9); } }
+@keyframes bouquet-celebrate { 45% { transform: translateX(-50%) scale(1.06) rotate(1.5deg); } 100% { transform: translateX(-50%) scale(1); } }
+@keyframes heart-complete { 45% { transform: scale(1.15); } 100% { transform: scale(1); } }
 @keyframes candle-flicker { from { transform: translateX(-50%) rotate(42deg) scale(.94); } to { transform: translateX(-50%) rotate(48deg) scale(1.06); } }
 @keyframes flame-out { 55% { opacity: .7; transform: translateX(-50%) translateY(-12px) rotate(45deg) scale(.7); } 100% { opacity: 0; transform: translateX(-50%) translateY(-28px) rotate(45deg) scale(.15); } }
 .letter-scene { display: grid; place-items: center; }
@@ -390,8 +393,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .story-section { padding: 90px 18px; }
   .interactive-heading { margin-bottom: 34px; }
   .interactive-heading h2 { font-size: clamp(38px, 12vw, 54px); }
-  .petal-bouquet { width: min(330px, 88vw); }
-  .petal-button { width: 48px; height: 48px; font-size: 23px; }
+  .love-meter-scene { width: min(350px, 92vw); min-height: 430px; }
+  .love-meter-scene > img { width: min(310px, 78vw); max-height: 320px; }
+  .love-percentage { top: 247px; }
+  .love-heart-hold { width: 108px; height: 99px; }
+  .love-heart-hold span { font-size: 99px; }
   .petal-message { min-height: 108px; padding: 19px 18px; }
   .polaroid-deck { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px 13px; }
   .polaroid-front, .polaroid-back { padding: 8px; }
