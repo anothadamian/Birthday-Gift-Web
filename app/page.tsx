@@ -547,6 +547,7 @@ export default function Home() {
           <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Geser sekali untuk lanjut, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
 
           <section className="petal-story story-section">
+            {loveProgress >= 100 && <div className="wish-confetti love-confetti" aria-hidden="true">{Array.from({ length: 32 }, (_, index) => <span key={index} style={{ '--confetti-x': `${((index * 37) % 101) - 50}vw`, '--confetti-y': `${38 + ((index * 29) % 34)}vh`, '--confetti-rotate': `${180 + ((index * 73) % 540)}deg`, '--confetti-delay': `${(index % 8) * 0.045}s` } as React.CSSProperties} />)}</div>}
             <div className="interactive-heading"><span className="eyebrow">01 · fill my heart</span><h2>Sebelum lanjut,<br />seberapa penuh hatimu?</h2><p>Tahan hatinya sampai penuh. Jangan dilepas dulu, ya.</p></div>
             <div className={`love-meter-scene ${loveProgress >= 100 ? 'complete' : ''}`} style={{ '--love-progress': `${loveProgress}%` } as React.CSSProperties}>
               <img src="/journey/birthday-bouquet.webp" alt="Buket dari Ken untuk Naya" loading="lazy" decoding="async" />
@@ -592,7 +593,9 @@ export default function Home() {
               <img src="/interactives/constellation-sky.png" alt="Langit malam untuk permainan konstelasi" loading="lazy" decoding="async" />
               <div className="constellation-heart-mark" aria-hidden="true">♡</div>
               <div className="shooting-stars" aria-hidden="true"><span /><span /><span /></div>
-              {[0, 1, 2, 3].map((line) => <span key={line} className={`star-line star-line-${line + 1} ${constellationStep > line + 1 ? 'active' : ''}`} aria-hidden="true" />)}
+              <svg className="constellation-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                {[[17, 68, 34, 35], [34, 35, 54, 62], [54, 62, 71, 27], [71, 27, 87, 55]].map(([x1, y1, x2, y2], line) => <line key={line} className={constellationStep > line + 1 ? 'active' : ''} x1={x1} y1={y1} x2={x2} y2={y2} pathLength="1" />)}
+              </svg>
               {['Aku', 'memilih', 'kamu', 'hari ini', 'dan seterusnya'].map((word, star) => <button key={word} className={`star-node star-node-${star + 1} ${star < constellationStep ? 'connected' : ''} ${star === constellationStep ? 'next' : ''}`} type="button" onClick={() => connectStar(star)} aria-label={`Bintang ${star + 1}${star === constellationStep ? ', pilih berikutnya' : ''}`}><span aria-hidden="true">✦</span><small aria-hidden="true">{word}</small></button>)}
               <div className="constellation-result" aria-live="polite"><strong>{constellationStep === 5 ? 'K ✦ N' : `${constellationStep}/5`}</strong><span>{constellationStep === 5 ? 'our little constellation' : 'kata ditemukan'}</span></div>
               <p className="constellation-secret" aria-live="polite">{constellationStep === 0 ? 'Temukan pesan rahasianya ✦' : ['Aku', 'Aku memilih', 'Aku memilih kamu', 'Aku memilih kamu hari ini', `Aku memilih kamu hari ini dan seterusnya, ${gift.nickname}.`][constellationStep - 1]}</p>

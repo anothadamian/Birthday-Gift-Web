@@ -280,23 +280,20 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .constellation-game::after { content: ''; position: absolute; z-index: 2; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 48%, transparent 28%, rgba(8,10,33,.32) 100%); }
 .constellation-game > img { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .8; }
 .constellation-heart-mark { position: absolute; z-index: 1; top: 50%; left: 50%; color: #ffb4cc; font-family: Arial, sans-serif; font-size: clamp(190px, 27vw, 290px); line-height: 1; opacity: 0; transform: translate(-50%, -50%) scale(.7); text-shadow: 0 0 35px rgba(255,145,183,.6); transition: opacity .8s ease, transform 1s cubic-bezier(.16,.8,.2,1); }
-.star-node { position: absolute; z-index: 5; display: grid; width: 52px; height: 52px; padding: 0; place-items: center; overflow: visible; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; color: rgba(255,255,255,.55); background: rgba(15,17,47,.58); box-shadow: 0 0 0 8px rgba(255,255,255,.04); transition: color .35s ease, background .35s ease, box-shadow .35s ease, transform .35s ease; }
+.star-node { position: absolute; z-index: 5; display: grid; width: 52px; height: 52px; padding: 0; place-items: center; overflow: visible; transform: translate(-50%, -50%); border: 1px solid rgba(255,255,255,.5); border-radius: 50%; color: rgba(255,255,255,.55); background: rgba(15,17,47,.58); box-shadow: 0 0 0 8px rgba(255,255,255,.04); transition: color .35s ease, background .35s ease, box-shadow .35s ease, transform .35s ease; }
 .star-node > span { font-size: 25px; line-height: 1; }
 .star-node > small { position: absolute; top: calc(100% + 10px); left: 50%; width: max-content; max-width: 110px; padding: 5px 9px; transform: translate(-50%, 7px); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; color: #fff4f8; background: rgba(17,18,51,.68); box-shadow: 0 8px 22px rgba(5,7,25,.2); font-family: var(--hand); font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .45s ease, transform .45s ease; backdrop-filter: blur(7px); }
-.star-node-1 { left: 16%; top: 61%; }
-.star-node-2 { left: 32%; top: 28%; }
-.star-node-3 { left: 51%; top: 55%; }
-.star-node-4 { left: 67%; top: 20%; }
-.star-node-5 { left: 82%; top: 48%; }
+.star-node-1 { left: 17%; top: 68%; }
+.star-node-2 { left: 34%; top: 35%; }
+.star-node-3 { left: 54%; top: 62%; }
+.star-node-4 { left: 71%; top: 27%; }
+.star-node-5 { left: 87%; top: 55%; }
 .star-node.next { color: #fff5c9; background: rgba(238,102,145,.78); box-shadow: 0 0 16px #fff4c5, 0 0 0 10px rgba(255,213,229,.12); animation: next-star 1.1s ease-in-out infinite alternate; }
 .star-node.connected { color: #fff7c4; background: rgba(225,76,121,.7); box-shadow: 0 0 18px rgba(255,245,192,.9); }
 .star-node.connected > small { opacity: 1; transform: translate(-50%, 0); }
-.star-line { position: absolute; z-index: 3; height: 2px; border-radius: 999px; background: linear-gradient(90deg, #fff5c9, #ff9ebe); box-shadow: 0 0 10px rgba(255,230,181,.75); opacity: .14; transform-origin: left center; transition: opacity .5s ease; }
-.star-line.active { opacity: 1; }
-.star-line-1 { top: 66%; left: 19%; width: 23%; transform: rotate(-57deg); }
-.star-line-2 { top: 34%; left: 35%; width: 24%; transform: rotate(35deg); }
-.star-line-3 { top: 60%; left: 54%; width: 25%; transform: rotate(-56deg); }
-.star-line-4 { top: 26%; left: 70%; width: 20%; transform: rotate(42deg); }
+.constellation-lines { position: absolute; z-index: 3; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.constellation-lines line { fill: none; stroke: #ffcfdd; stroke-width: 2; stroke-linecap: round; opacity: .14; filter: drop-shadow(0 0 5px rgba(255,230,181,.75)); vector-effect: non-scaling-stroke; transition: opacity .55s ease, stroke .55s ease; }
+.constellation-lines line.active { stroke: #ffe6b8; opacity: 1; }
 .constellation-result { position: absolute; z-index: 6; top: 16px; right: 18px; display: flex; min-width: 145px; padding: 10px 15px; align-items: baseline; justify-content: center; gap: 9px; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; background: rgba(13,15,43,.66); backdrop-filter: blur(12px); }
 .constellation-result strong { color: #ffc1d5; font-family: var(--serif); font-size: 23px; }
 .constellation-result span { color: rgba(255,255,255,.8); font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
@@ -337,13 +334,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .wish-confetti span:nth-child(4n + 2) { border-radius: 50%; background: #f4a7be; }
 .wish-confetti span:nth-child(4n + 3) { width: 12px; height: 8px; background: #f3bf61; }
 .wish-confetti span:nth-child(4n + 4) { width: 8px; height: 13px; background: #a98bd4; }
+.love-confetti span { top: 62%; }
 @keyframes story-cue { 50% { transform: translateY(8px); } }
 @keyframes bouquet-celebrate { 45% { transform: translateX(-50%) scale(1.06) rotate(1.5deg); } 100% { transform: translateX(-50%) scale(1); } }
 @keyframes heart-complete { 45% { transform: translateX(-50%) scale(1.15); } 100% { transform: translateX(-50%) scale(1); } }
 @keyframes jar-heart-float { to { transform: translateY(-10px) rotate(5deg); } }
 @keyframes jar-heart-drop { from { opacity: 0; transform: translateY(-45px) scale(.3); } }
 @keyframes jar-complete { 50% { transform: translateX(-50%) scale(1.04) rotate(-1deg); } }
-@keyframes next-star { to { transform: scale(1.13); } }
+@keyframes next-star { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.13); } }
 @keyframes shooting-star { 0% { opacity: 0; transform: translateX(0) rotate(-18deg) scaleX(.45); } 14% { opacity: 1; } 100% { opacity: 0; transform: translateX(900px) rotate(-18deg) scaleX(1); } }
 @keyframes envelope-letter-in { from { opacity: 0; transform: translateY(-18px) rotate(-1.2deg) scale(.97); } to { opacity: 1; transform: translateY(0) rotate(-.5deg) scale(1); } }
 @keyframes wish-confetti-burst {
@@ -506,15 +504,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .star-node { width: 44px; height: 44px; font-size: 21px; }
   .star-node > span { font-size: 21px; }
   .star-node > small { top: calc(100% + 7px); padding: 4px 7px; font-size: 12px; }
-  .star-node-1 { left: 9%; }
-  .star-node-2 { left: 27%; }
-  .star-node-3 { left: 49%; }
-  .star-node-4 { left: 66%; }
-  .star-node-5 { left: 82%; }
-  .star-line-1 { left: 14%; width: 27%; }
-  .star-line-2 { left: 32%; width: 29%; }
-  .star-line-3 { left: 54%; width: 27%; }
-  .star-line-4 { left: 71%; width: 22%; }
   .star-node-5 > small { right: -5px; left: auto; transform: translate(0, 7px); }
   .star-node-5.connected > small { transform: translate(0, 0); }
   .constellation-result { top: 10px; right: 10px; bottom: auto; min-width: 118px; padding: 7px 10px; }
