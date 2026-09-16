@@ -551,7 +551,7 @@ export default function Home() {
             <div className={`love-meter-scene ${loveProgress >= 100 ? 'complete' : ''}`} style={{ '--love-progress': `${loveProgress}%` } as React.CSSProperties}>
               <img src="/journey/birthday-bouquet.webp" alt="Buket dari Ken untuk Naya" loading="lazy" decoding="async" />
               <div className="love-percentage" aria-live="polite"><strong>{loveProgress}%</strong><span>{loveProgress >= 100 ? 'You filled my heart ♥' : loveProgress >= 75 ? 'Sedikit lagi...' : loveProgress >= 40 ? 'Makin penuh...' : 'Tahan terus'}</span></div>
-              <button className="love-heart-hold" onPointerDown={startLoveHold} onPointerUp={stopLoveHold} onPointerLeave={stopLoveHold} onPointerCancel={stopLoveHold} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') startLoveHold(); }} onKeyUp={(event) => { if (event.key === 'Enter' || event.key === ' ') stopLoveHold(); }} disabled={loveProgress >= 100} aria-label="Tahan hati sampai seratus persen"><span className="love-heart-fill" aria-hidden="true">♥</span><span className="love-heart-outline" aria-hidden="true">♡</span></button>
+              <button className="love-heart-hold" onPointerDown={startLoveHold} onPointerUp={stopLoveHold} onPointerLeave={stopLoveHold} onPointerCancel={stopLoveHold} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') startLoveHold(); }} onKeyUp={(event) => { if (event.key === 'Enter' || event.key === ' ') stopLoveHold(); }} disabled={loveProgress >= 100} aria-label="Tahan hati sampai seratus persen"><span className="love-heart-shape" aria-hidden="true">♥</span></button>
             </div>
             <div className={`petal-message ${loveProgress >= 100 ? 'complete' : ''}`} aria-live="polite"><span>{loveProgress >= 100 ? '100% FOR YOU' : 'HOLD THE HEART'}</span><p>{loveProgress >= 100 ? `Aku suka caramu membuat hal sederhana terasa istimewa, ${gift.nickname}. Semua bunga ini untukmu.` : 'Isi hatinya untuk membuka pesan kecil dari Ken.'}</p></div>
           </section>
@@ -568,7 +568,7 @@ export default function Home() {
               { title: 'Kalau kamu kangen', text: 'Ingat, jarak hanya mengubah tempat kita berdiri—bukan rasa yang aku simpan.' },
               { title: 'Buka sekarang', text: gift.message },
             ].map((letter, index) => <button className={`love-envelope ${openEnvelope === index ? 'open' : ''}`} key={letter.title} onClick={() => { setOpenEnvelope(index); melody.sparkle(); }} aria-expanded={openEnvelope === index}><span className="envelope-icon" aria-hidden="true">♡</span><strong>{letter.title}</strong><small>{openEnvelope === index ? 'sudah dibuka' : 'ketuk amplop'}</small></button>)}</div>
-            <div className={`envelope-letter ${openEnvelope !== null ? 'visible' : ''}`} aria-live="polite">{openEnvelope !== null && <><span>Dear {gift.nickname},</span><p>“{[
+            <div key={openEnvelope ?? 'closed'} className={`envelope-letter ${openEnvelope !== null ? 'visible' : ''}`} aria-live="polite">{openEnvelope !== null && <><span>Dear {gift.nickname},</span><p>“{[
               `Kamu tidak harus selalu terlihat kuat, ${gift.nickname}. Cerita saja kepadaku, aku akan mendengarkan.`,
               'Ingat, jarak hanya mengubah tempat kita berdiri—bukan rasa yang aku simpan.',
               gift.message,

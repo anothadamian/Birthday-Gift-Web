@@ -205,17 +205,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .interactive-heading p { max-width: 520px; margin: auto; color: color-mix(in srgb, var(--ink) 68%, transparent); line-height: 1.7; }
 
 .petal-story { background: radial-gradient(circle at 50% 56%, color-mix(in srgb, var(--glow) 38%, transparent), transparent 35%); }
-.love-meter-scene { position: relative; display: grid; width: min(430px, 92vw); height: clamp(310px, 42vh, 390px); min-height: 0; flex: 0 1 auto; place-items: end center; }
+.love-meter-scene { position: relative; width: min(430px, 92vw); height: clamp(310px, 42vh, 390px); min-height: 0; flex: 0 1 auto; }
 .love-meter-scene > img { position: absolute; z-index: 1; top: 0; left: 50%; width: min(350px, 77vw); height: 76%; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(70,31,48,.16)); opacity: .94; transform: translateX(-50%); }
-.love-percentage { position: absolute; z-index: 3; top: 63%; left: 50%; display: flex; min-width: 170px; padding: 9px 16px; align-items: baseline; justify-content: center; gap: 9px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; background: rgba(255,255,255,.84); box-shadow: 0 12px 30px rgba(71,31,47,.12); backdrop-filter: blur(10px); }
+.love-percentage { position: absolute; z-index: 3; bottom: 104px; left: 50%; display: flex; min-width: 182px; padding: 9px 16px; align-items: baseline; justify-content: center; gap: 9px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; background: rgba(255,255,255,.9); box-shadow: 0 12px 30px rgba(71,31,47,.12); backdrop-filter: blur(10px); }
 .love-percentage strong { color: var(--accent); font-family: var(--serif); font-size: 28px; }
 .love-percentage span { color: color-mix(in srgb, var(--ink) 65%, transparent); font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
-.love-heart-hold { position: relative; z-index: 4; width: 102px; height: 94px; padding: 0; overflow: hidden; border: 0; color: var(--accent); background: transparent; filter: drop-shadow(0 12px 20px rgba(116,30,63,.2)); touch-action: none; user-select: none; }
-.love-heart-hold span { position: absolute; inset: 0; display: grid; place-items: center; font-family: Arial, sans-serif; font-size: 94px; line-height: 1; }
-.love-heart-fill { color: var(--accent); clip-path: inset(calc(100% - var(--love-progress)) 0 0); transition: clip-path .08s linear; }
-.love-heart-outline { color: color-mix(in srgb, var(--accent) 74%, white); }
+.love-heart-hold { position: absolute; z-index: 4; bottom: 0; left: 50%; width: 96px; height: 90px; padding: 0; overflow: visible; transform: translateX(-50%); border: 0; color: var(--accent); background: transparent; filter: drop-shadow(0 12px 20px rgba(116,30,63,.2)); touch-action: none; user-select: none; }
+.love-heart-shape { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(to top, var(--accent) 0 var(--love-progress), color-mix(in srgb, var(--accent) 16%, white) var(--love-progress) 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--accent) 78%, white); font-family: Arial, sans-serif; font-size: 88px; line-height: 1; transition: background .1s linear, -webkit-text-stroke .2s ease; }
 .love-meter-scene.complete > img { animation: bouquet-celebrate .8s ease both; }
 .love-meter-scene.complete .love-heart-hold { animation: heart-complete .75s ease both; }
+.love-meter-scene.complete .love-heart-shape { background: var(--accent); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: 0 transparent; }
 .petal-message { width: min(560px, 100%); margin-top: 12px; padding: 14px 22px; border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 22px; background: color-mix(in srgb, white 86%, var(--soft)); box-shadow: 0 18px 50px rgba(74,35,49,.09); text-align: center; transition: transform .6s ease, border-color .6s ease; }
 .petal-message.complete { border-color: color-mix(in srgb, var(--accent) 42%, transparent); transform: translateY(-5px); }
 .petal-message span { color: var(--accent); font-family: var(--mono); font-size: 10px; letter-spacing: .14em; }
@@ -250,7 +249,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .love-envelope.open { border-color: color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-8px); }
 .love-envelope.open .envelope-icon { transform: rotate(-8deg) translateY(-5px); }
 .envelope-letter { width: min(680px, 100%); max-height: 0; margin-top: 0; padding: 0 34px; overflow: hidden; border-radius: 6px; color: #4b3039; background: #fffaf2; box-shadow: 0 24px 65px rgba(67,29,43,.14); opacity: 0; transform: translateY(-22px); transition: max-height .8s ease, margin .8s ease, padding .8s ease, opacity .55s ease, transform .8s ease; text-align: center; }
-.envelope-letter.visible { max-height: min(28vh, 245px); margin-top: 22px; padding: 24px 38px; opacity: 1; transform: translateY(0) rotate(-.5deg); }
+.envelope-letter.visible { max-height: min(28vh, 245px); margin-top: 22px; padding: 24px 38px; opacity: 1; transform: translateY(0) rotate(-.5deg); animation: envelope-letter-in .72s cubic-bezier(.18,.78,.23,1) both; }
 .envelope-letter > span, .envelope-letter > small { color: var(--accent); font-family: var(--hand); font-size: 21px; }
 .envelope-letter p { margin: 12px 0; font-family: var(--serif); font-size: clamp(17px, 2.2vh, 22px); line-height: 1.45; }
 
@@ -310,17 +309,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .candle-hold { position: relative; display: flex; min-width: 210px; min-height: 58px; padding: 8px 20px 8px 9px; overflow: hidden; align-items: center; gap: 13px; border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 999px; color: var(--ink); background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 23%, white) 0 var(--wish-progress), color-mix(in srgb, white 83%, var(--soft)) var(--wish-progress) 100%); touch-action: none; user-select: none; }
 .candle-hold span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; color: white; background: var(--accent); }
 .candle-hold strong { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; }
-.final-wish { width: min(720px, 100%); margin-top: 38px; padding: 34px; border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 24px; background: color-mix(in srgb, white 84%, var(--soft)); box-shadow: 0 22px 60px rgba(68,29,43,.1); animation: letter-reveal .8s ease both; }
-.final-wish p { margin: 0; font-family: var(--serif); font-size: clamp(24px, 4vw, 38px); line-height: 1.3; }
-.final-wish blockquote { margin: 24px auto 14px; color: var(--accent); font-family: var(--hand); font-size: clamp(22px, 4vw, 31px); line-height: 1.4; }
+.final-wish { width: min(640px, 100%); margin-top: 16px; padding: 22px 28px; border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 24px; background: color-mix(in srgb, white 84%, var(--soft)); box-shadow: 0 22px 60px rgba(68,29,43,.1); animation: letter-reveal .8s ease both; }
+.final-wish p { margin: 0; font-family: var(--serif); font-size: clamp(21px, 3.2vh, 29px); line-height: 1.25; }
+.final-wish blockquote { margin: 13px auto 9px; color: var(--accent); font-family: var(--hand); font-size: clamp(20px, 2.8vh, 27px); line-height: 1.3; }
 .final-wish > span { color: color-mix(in srgb, var(--ink) 62%, transparent); font-family: var(--mono); font-size: 10px; }
+.wish-made .interactive-heading { margin-bottom: 8px; }
+.wish-made .birthday-cake { height: 0; margin: 0; overflow: hidden; opacity: 0; transform: translateY(-16px) scale(.82); transition: height .55s ease, margin .55s ease, opacity .35s ease, transform .55s ease; }
+.wish-made .candle-hold { min-height: 50px; }
+.wish-made .ending-actions { margin-top: 12px; }
 @keyframes story-cue { 50% { transform: translateY(8px); } }
 @keyframes bouquet-celebrate { 45% { transform: translateX(-50%) scale(1.06) rotate(1.5deg); } 100% { transform: translateX(-50%) scale(1); } }
-@keyframes heart-complete { 45% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes heart-complete { 45% { transform: translateX(-50%) scale(1.15); } 100% { transform: translateX(-50%) scale(1); } }
 @keyframes jar-heart-float { to { transform: translateY(-10px) rotate(5deg); } }
 @keyframes jar-heart-drop { from { opacity: 0; transform: translateY(-45px) scale(.3); } }
 @keyframes jar-complete { 50% { transform: translateX(-50%) scale(1.04) rotate(-1deg); } }
 @keyframes next-star { to { transform: scale(1.13); } }
+@keyframes envelope-letter-in { from { opacity: 0; transform: translateY(-18px) rotate(-1.2deg) scale(.97); } to { opacity: 1; transform: translateY(0) rotate(-.5deg) scale(1); } }
 @keyframes candle-flicker { from { transform: translateX(-50%) rotate(42deg) scale(.94); } to { transform: translateX(-50%) rotate(48deg) scale(1.06); } }
 @keyframes flame-out { 55% { opacity: .7; transform: translateX(-50%) translateY(-12px) rotate(45deg) scale(.7); } 100% { opacity: 0; transform: translateX(-50%) translateY(-28px) rotate(45deg) scale(.15); } }
 .letter-scene { display: grid; place-items: center; }
@@ -445,7 +449,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .interactive-heading p { font-size: 13px; line-height: 1.45; }
   .love-meter-scene { width: min(340px, 92vw); height: clamp(280px, 39vh, 345px); }
   .love-meter-scene > img { width: min(280px, 72vw); height: 75%; }
-  .love-percentage { top: 59%; padding: 7px 13px; }
+  .love-percentage { top: auto; bottom: 88px; padding: 7px 13px; }
   .love-heart-hold { width: 84px; height: 78px; }
   .love-heart-hold span { font-size: 78px; }
   .petal-message { margin-top: 8px; padding: 12px 16px; }
