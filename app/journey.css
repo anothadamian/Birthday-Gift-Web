@@ -248,10 +248,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .love-envelope small { margin-top: 10px; color: color-mix(in srgb, var(--ink) 58%, transparent); font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
 .love-envelope.open { border-color: color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-8px); }
 .love-envelope.open .envelope-icon { transform: rotate(-8deg) translateY(-5px); }
-.envelope-letter { width: min(680px, 100%); max-height: 0; margin-top: 0; padding: 0 34px; overflow: hidden; border-radius: 6px; color: #4b3039; background: #fffaf2; box-shadow: 0 24px 65px rgba(67,29,43,.14); opacity: 0; transform: translateY(-22px); transition: max-height .8s ease, margin .8s ease, padding .8s ease, opacity .55s ease, transform .8s ease; text-align: center; }
-.envelope-letter.visible { max-height: min(28vh, 245px); margin-top: 22px; padding: 24px 38px; opacity: 1; transform: translateY(0) rotate(-.5deg); animation: envelope-letter-in .72s cubic-bezier(.18,.78,.23,1) both; }
+.envelope-letter { width: min(680px, 100%); max-height: 0; margin-top: 0; padding: 0 34px; overflow: hidden; border-radius: 6px; color: #4b3039; background: #fffaf2; box-shadow: 0 24px 65px rgba(67,29,43,.14); opacity: 0; transform: translateY(-22px); transition: max-height .8s cubic-bezier(.16,1,.3,1), margin .8s ease, padding .8s ease, opacity .55s ease, transform .8s ease; text-align: center; }
+.envelope-letter.visible { max-height: 900px; margin-top: 22px; padding: 26px 38px; opacity: 1; transform: translateY(0) rotate(-.5deg); animation: envelope-letter-in .72s cubic-bezier(.18,.78,.23,1) both; }
 .envelope-letter > span, .envelope-letter > small { color: var(--accent); font-family: var(--hand); font-size: 21px; }
-.envelope-letter p { margin: 12px 0; font-family: var(--serif); font-size: clamp(17px, 2.2vh, 22px); line-height: 1.45; }
+.envelope-letter p { margin: 12px 0; font-family: var(--serif); font-size: clamp(16px, 2.2vh, 21px); line-height: 1.6; }
 
 .jar-story { background: radial-gradient(circle at 50% 61%, rgba(255,255,255,.88), color-mix(in srgb, var(--glow) 26%, transparent) 34%, transparent 64%); }
 .love-jar-game { position: relative; width: min(520px, 92vw); height: clamp(330px, 47vh, 440px); }
@@ -279,7 +279,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .constellation-game { position: relative; width: min(760px, 92vw); height: clamp(350px, 50vh, 470px); overflow: hidden; border: 8px solid rgba(255,255,255,.8); border-radius: 34px; background: #161831; box-shadow: 0 28px 70px rgba(88,38,58,.2), 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent); isolation: isolate; }
 .constellation-game::after { content: ''; position: absolute; z-index: 2; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 48%, transparent 28%, rgba(8,10,33,.32) 100%); }
 .constellation-game > img { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .8; }
-.constellation-heart-mark { position: absolute; z-index: 1; top: 50%; left: 50%; color: #ffb4cc; font-family: Arial, sans-serif; font-size: clamp(190px, 27vw, 290px); line-height: 1; opacity: 0; transform: translate(-50%, -50%) scale(.7); text-shadow: 0 0 35px rgba(255,145,183,.6); transition: opacity .8s ease, transform 1s cubic-bezier(.16,.8,.2,1); }
+.constellation-heart-mark { position: absolute; z-index: 1; top: 50%; left: 50%; color: #ffb4cc; font-family: Arial, sans-serif; font-size: clamp(190px, 27vw, 290px); line-height: 1; opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(.7); text-shadow: 0 0 35px rgba(255,145,183,.6); transition: opacity .8s ease, transform 1s cubic-bezier(.16,.8,.2,1); }
+.constellation-heart-mark.visible { opacity: .42; transform: translate(-50%, -50%) scale(1); animation: constellation-heart-glow 1.8s ease-in-out infinite alternate; }
+@keyframes constellation-heart-glow {
+  0% { transform: translate(-50%, -50%) scale(0.96); opacity: .32; filter: drop-shadow(0 0 10px rgba(255,144,184,.4)); }
+  100% { transform: translate(-50%, -50%) scale(1.04); opacity: .52; filter: drop-shadow(0 0 25px rgba(255,144,184,.7)); }
+}
 .star-node { position: absolute; z-index: 5; display: grid; width: 52px; height: 52px; padding: 0; place-items: center; overflow: visible; transform: translate(-50%, -50%); border: 1px solid rgba(255,255,255,.5); border-radius: 50%; color: rgba(255,255,255,.55); background: rgba(15,17,47,.58); box-shadow: 0 0 0 8px rgba(255,255,255,.04); transition: color .35s ease, background .35s ease, box-shadow .35s ease, transform .35s ease; }
 .star-node > span { font-size: 25px; line-height: 1; }
 .star-node > small { position: absolute; top: calc(100% + 10px); left: 50%; width: max-content; max-width: 110px; padding: 5px 9px; transform: translate(-50%, 7px); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; color: #fff4f8; background: rgba(17,18,51,.68); box-shadow: 0 8px 22px rgba(5,7,25,.2); font-family: var(--hand); font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .45s ease, transform .45s ease; backdrop-filter: blur(7px); }
@@ -303,7 +308,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .shooting-stars span:nth-child(2) { top: 42%; animation-delay: .28s !important; }
 .shooting-stars span:nth-child(3) { top: 67%; animation-delay: .52s !important; }
 .constellation-game.complete { box-shadow: 0 30px 90px rgba(224,78,124,.3), 0 0 0 1px color-mix(in srgb, var(--accent) 34%, transparent); }
-.constellation-game.complete .constellation-heart-mark { opacity: .15; transform: translate(-50%, -50%) scale(1); }
 .constellation-game.complete .constellation-secret { background: rgba(117,38,73,.82); box-shadow: 0 0 28px rgba(255,144,184,.25); }
 .constellation-game.complete .shooting-stars span { animation: shooting-star 1.45s cubic-bezier(.2,.75,.25,1) both; }
 
@@ -334,6 +338,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .wish-confetti span:nth-child(4n + 2) { border-radius: 50%; background: #f4a7be; }
 .wish-confetti span:nth-child(4n + 3) { width: 12px; height: 8px; background: #f3bf61; }
 .wish-confetti span:nth-child(4n + 4) { width: 8px; height: 13px; background: #a98bd4; }
+.gift-confetti span { top: 52%; }
 .love-confetti span { top: 62%; }
 @keyframes story-cue { 50% { transform: translateY(8px); } }
 @keyframes bouquet-celebrate { 45% { transform: translateX(-50%) scale(1.06) rotate(1.5deg); } 100% { transform: translateX(-50%) scale(1); } }
@@ -490,9 +495,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .love-envelope { min-height: 132px; padding: 15px 6px 11px; border-radius: 16px; }
   .love-envelope strong { font-size: 15px; line-height: 1.08; }
   .love-envelope small { font-size: 7px; }
-  .envelope-icon { width: 44px; height: 36px; margin-bottom: 9px; }
-  .envelope-letter.visible { max-height: 29vh; margin-top: 14px; padding: 18px 16px; }
-  .envelope-letter p { font-size: 16px; line-height: 1.35; }
+  .envelope-story { min-height: 100svh; height: auto; }
+  .envelope-letter.visible { max-height: 900px; margin-top: 14px; padding: 20px 18px 24px; }
+  .envelope-letter p { font-size: clamp(14px, 3.8vw, 16px); line-height: 1.55; }
   .love-jar-game { width: min(390px, 94vw); height: clamp(300px, 43vh, 380px); }
   .love-jar-game > img { width: min(240px, 61vw); }
   .jar-heart { width: 48px; height: 48px; font-size: 27px; }
@@ -554,7 +559,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .polaroid-deck { gap: 14px 9px; }
   .love-envelope { min-height: 108px; }
   .envelope-icon { width: 38px; height: 31px; }
-  .envelope-letter.visible { max-height: 24vh; padding: 12px; }
+  .envelope-letter.visible { max-height: 900px; padding: 16px 14px 20px; }
   .love-jar-game, .constellation-game { height: 265px; }
   .birthday-cake { transform: scale(.6); margin-block: -53px -32px; }
   .candle-hold { min-height: 50px; }

@@ -174,6 +174,7 @@ export default function Home() {
   const [openEnvelope, setOpenEnvelope] = useState<number | null>(null);
   const [jarHearts, setJarHearts] = useState<number[]>([]);
   const [constellationStep, setConstellationStep] = useState(0);
+  const [showConstellationHeart, setShowConstellationHeart] = useState(false);
   const [candleProgress, setCandleProgress] = useState(0);
   const [candleBlown, setCandleBlown] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -186,6 +187,7 @@ export default function Home() {
   const wonRef = useRef(false);
   const loveTimerRef = useRef<number | null>(null);
   const candleTimerRef = useRef<number | null>(null);
+  const constellationHeartTimerRef = useRef<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const currentTheme = themes[gift.theme];
@@ -195,6 +197,7 @@ export default function Home() {
     melody.pause();
     if (loveTimerRef.current !== null) window.clearInterval(loveTimerRef.current);
     if (candleTimerRef.current !== null) window.clearInterval(candleTimerRef.current);
+    if (constellationHeartTimerRef.current !== null) window.clearTimeout(constellationHeartTimerRef.current);
   }, []);
   useEffect(() => {
     document.body.style.overflow = editorOpen || storyPreview ? 'hidden' : '';
@@ -273,6 +276,8 @@ export default function Home() {
     setOpenEnvelope(null);
     setJarHearts([]);
     setConstellationStep(0);
+    setShowConstellationHeart(false);
+    if (constellationHeartTimerRef.current !== null) window.clearTimeout(constellationHeartTimerRef.current);
     setCandleProgress(0);
     setCandleBlown(false);
     moveTo('intro');
@@ -423,6 +428,15 @@ export default function Home() {
     const next = Math.min(5, constellationStep + 1);
     setConstellationStep(next);
     melody.sparkle();
+    if (next === 5) {
+      setShowConstellationHeart(true);
+      if (constellationHeartTimerRef.current !== null) {
+        window.clearTimeout(constellationHeartTimerRef.current);
+      }
+      constellationHeartTimerRef.current = window.setTimeout(() => {
+        setShowConstellationHeart(false);
+      }, 3600);
+    }
   };
   const stopCandleHold = (reset = true) => {
     if (candleTimerRef.current !== null) {
@@ -522,6 +536,21 @@ export default function Home() {
       {stage === 'gift' && (
         <section className={`gift-stage stage-screen ${giftOpened ? 'gift-opened' : ''}`}>
           <div className="sky-sparkles">{ambient}</div>
+          {giftOpened && (
+            <div className="wish-confetti gift-confetti" aria-hidden="true">
+              {Array.from({ length: 48 }, (_, index) => (
+                <span
+                  key={index}
+                  style={{
+                    '--confetti-x': `${((index * 41) % 111) - 55}vw`,
+                    '--confetti-y': `${14 + ((index * 23) % 54)}vh`,
+                    '--confetti-rotate': `${180 + ((index * 67) % 540)}deg`,
+                    '--confetti-delay': `${(index % 12) * 0.035}s`,
+                  } as React.CSSProperties}
+                />
+              ))}
+            </div>
+          )}
           <div className="gift-reveal">
             <span className="eyebrow">you did it, {gift.nickname}!</span>
             <h2>{giftOpened ? <>A bouquet <em>just for you.</em></> : <>A little gift <em>for you.</em></>}</h2>
@@ -547,7 +576,21 @@ export default function Home() {
           <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Geser sekali untuk lanjut, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
 
           <section className="petal-story story-section">
-            {loveProgress >= 100 && <div className="wish-confetti love-confetti" aria-hidden="true">{Array.from({ length: 32 }, (_, index) => <span key={index} style={{ '--confetti-x': `${((index * 37) % 101) - 50}vw`, '--confetti-y': `${38 + ((index * 29) % 34)}vh`, '--confetti-rotate': `${180 + ((index * 73) % 540)}deg`, '--confetti-delay': `${(index % 8) * 0.045}s` } as React.CSSProperties} />)}</div>}
+            {loveProgress >= 100 && (
+              <div className="wish-confetti love-confetti" aria-hidden="true">
+                {Array.from({ length: 32 }, (_, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      '--confetti-x': `${((index * 37) % 101) - 50}vw`,
+                      '--confetti-y': `${38 + ((index * 29) % 34)}vh`,
+                      '--confetti-rotate': `${180 + ((index * 73) % 540)}deg`,
+                      '--confetti-delay': `${(index % 8) * 0.045}s`,
+                    } as React.CSSProperties}
+                  />
+                ))}
+              </div>
+            )}
             <div className="interactive-heading"><span className="eyebrow">01 · fill my heart</span><h2>Sebelum lanjut,<br />seberapa penuh hatimu?</h2><p>Tahan hatinya sampai penuh. Jangan dilepas dulu, ya.</p></div>
             <div className={`love-meter-scene ${loveProgress >= 100 ? 'complete' : ''}`} style={{ '--love-progress': `${loveProgress}%` } as React.CSSProperties}>
               <img src="/journey/birthday-bouquet.webp" alt="Buket dari Ken untuk Naya" loading="lazy" decoding="async" />
@@ -591,7 +634,7 @@ export default function Home() {
             <div className="interactive-heading"><span className="eyebrow">05 · a secret in the sky</span><h2>Tulis nama kita di langit.</h2><p>Sentuh bintang yang berkilau. Setiap titik menyimpan satu kata dari {gift.from}.</p></div>
             <div className={`constellation-game step-${constellationStep} ${constellationStep === 5 ? 'complete' : ''}`}>
               <img src="/interactives/constellation-sky.png" alt="Langit malam untuk permainan konstelasi" loading="lazy" decoding="async" />
-              <div className="constellation-heart-mark" aria-hidden="true">♡</div>
+              <div className={`constellation-heart-mark ${showConstellationHeart ? 'visible' : ''}`} aria-hidden="true">♡</div>
               <div className="shooting-stars" aria-hidden="true"><span /><span /><span /></div>
               <svg className="constellation-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 {[[17, 68, 34, 35], [34, 35, 54, 62], [54, 62, 71, 27], [71, 27, 87, 55]].map(([x1, y1, x2, y2], line) => <line key={line} className={constellationStep > line + 1 ? 'active' : ''} x1={x1} y1={y1} x2={x2} y2={y2} pathLength="1" />)}
