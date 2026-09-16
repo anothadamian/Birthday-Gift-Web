@@ -315,8 +315,15 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .final-wish > span { color: color-mix(in srgb, var(--ink) 62%, transparent); font-family: var(--mono); font-size: 10px; }
 .wish-made .interactive-heading { margin-bottom: 8px; }
 .wish-made .birthday-cake { height: 0; margin: 0; overflow: hidden; opacity: 0; transform: translateY(-16px) scale(.82); transition: height .55s ease, margin .55s ease, opacity .35s ease, transform .55s ease; }
-.wish-made .candle-hold { min-height: 50px; }
+.wish-made .candle-hold { min-width: 224px; min-height: 50px; padding: 7px 19px 7px 7px; border-color: color-mix(in srgb, var(--accent) 30%, white); color: var(--accent); background: rgba(255,255,255,.9); box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 15%, transparent); }
+.wish-made .candle-hold span { width: 36px; height: 36px; }
+.wish-made .candle-hold strong { letter-spacing: .08em; }
 .wish-made .ending-actions { margin-top: 12px; }
+.wish-confetti { position: absolute; z-index: 20; inset: 0; overflow: hidden; pointer-events: none; }
+.wish-confetti span { position: absolute; top: 27%; left: 50%; width: 9px; height: 15px; border-radius: 3px; background: #e04b7b; opacity: 0; animation: wish-confetti-burst 2.65s cubic-bezier(.16,.72,.28,1) var(--confetti-delay) both; will-change: transform, opacity; }
+.wish-confetti span:nth-child(4n + 2) { border-radius: 50%; background: #f4a7be; }
+.wish-confetti span:nth-child(4n + 3) { width: 12px; height: 8px; background: #f3bf61; }
+.wish-confetti span:nth-child(4n + 4) { width: 8px; height: 13px; background: #a98bd4; }
 @keyframes story-cue { 50% { transform: translateY(8px); } }
 @keyframes bouquet-celebrate { 45% { transform: translateX(-50%) scale(1.06) rotate(1.5deg); } 100% { transform: translateX(-50%) scale(1); } }
 @keyframes heart-complete { 45% { transform: translateX(-50%) scale(1.15); } 100% { transform: translateX(-50%) scale(1); } }
@@ -325,6 +332,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 @keyframes jar-complete { 50% { transform: translateX(-50%) scale(1.04) rotate(-1deg); } }
 @keyframes next-star { to { transform: scale(1.13); } }
 @keyframes envelope-letter-in { from { opacity: 0; transform: translateY(-18px) rotate(-1.2deg) scale(.97); } to { opacity: 1; transform: translateY(0) rotate(-.5deg) scale(1); } }
+@keyframes wish-confetti-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.35); }
+  12% { opacity: 1; }
+  76% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--confetti-x)), var(--confetti-y)) rotate(var(--confetti-rotate)) scale(1); }
+}
 @keyframes candle-flicker { from { transform: translateX(-50%) rotate(42deg) scale(.94); } to { transform: translateX(-50%) rotate(48deg) scale(1.06); } }
 @keyframes flame-out { 55% { opacity: .7; transform: translateX(-50%) translateY(-12px) rotate(45deg) scale(.7); } 100% { opacity: 0; transform: translateX(-50%) translateY(-28px) rotate(45deg) scale(.15); } }
 .letter-scene { display: grid; place-items: center; }
@@ -542,4 +555,5 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .wish-confetti { display: none; }
 }
