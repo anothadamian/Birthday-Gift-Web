@@ -172,6 +172,8 @@ export default function Home() {
   const [loveProgress, setLoveProgress] = useState(0);
   const [flippedMemories, setFlippedMemories] = useState<number[]>([]);
   const [openEnvelope, setOpenEnvelope] = useState<number | null>(null);
+  const [jarHearts, setJarHearts] = useState<number[]>([]);
+  const [constellationStep, setConstellationStep] = useState(0);
   const [candleProgress, setCandleProgress] = useState(0);
   const [candleBlown, setCandleBlown] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -269,6 +271,8 @@ export default function Home() {
     setLoveProgress(0);
     setFlippedMemories([]);
     setOpenEnvelope(null);
+    setJarHearts([]);
+    setConstellationStep(0);
     setCandleProgress(0);
     setCandleBlown(false);
     moveTo('intro');
@@ -404,6 +408,22 @@ export default function Home() {
   const flipMemory = (index: number) => {
     setFlippedMemories((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
   };
+  const collectJarHeart = (index: number) => {
+    if (jarHearts.includes(index)) return;
+    const next = [...jarHearts, index];
+    setJarHearts(next);
+    melody.sparkle();
+  };
+  const connectStar = (index: number) => {
+    if (index < constellationStep) return;
+    if (index !== constellationStep) {
+      showToast('Ikuti bintang yang berkilau dulu ✦');
+      return;
+    }
+    const next = Math.min(5, constellationStep + 1);
+    setConstellationStep(next);
+    melody.sparkle();
+  };
   const stopCandleHold = (reset = true) => {
     if (candleTimerRef.current !== null) {
       window.clearInterval(candleTimerRef.current);
@@ -524,7 +544,7 @@ export default function Home() {
 
       {stage === 'story' && (
         <div className="story-stage"><div className="story-ambient" aria-hidden="true">{ambient}</div>
-          <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Scroll pelan-pelan, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
+          <section className="story-hero story-section"><span className="eyebrow">the bouquet is yours</span><h1>Happy Birthday,<br /><em>{gift.name}.</em></h1><p>Masih ada beberapa kejutan kecil dari {gift.from}. Geser sekali untuk lanjut, ya.</p><span className="story-scroll-cue" aria-hidden="true">↓</span></section>
 
           <section className="petal-story story-section">
             <div className="interactive-heading"><span className="eyebrow">01 · fill my heart</span><h2>Sebelum lanjut,<br />seberapa penuh hatimu?</h2><p>Tahan hatinya sampai penuh. Jangan dilepas dulu, ya.</p></div>
@@ -555,8 +575,29 @@ export default function Home() {
             ][openEnvelope]}”</p><small>with all my love, {gift.from}</small></>}</div>
           </section>
 
+          <section className="jar-story story-section">
+            <div className="interactive-heading"><span className="eyebrow">04 · collect my love</span><h2>Tangkap lima hati kecil.</h2><p>Ketuk satu per satu dan simpan semuanya di dalam love jar.</p></div>
+            <div className={`love-jar-game ${jarHearts.length === 5 ? 'complete' : ''}`}>
+              <img src="/interactives/love-jar.png" alt="Love jar untuk mengumpulkan hati" loading="lazy" decoding="async" />
+              {[0, 1, 2, 3, 4].map((heart) => <button key={heart} className={`jar-heart jar-heart-${heart + 1} ${jarHearts.includes(heart) ? 'collected' : ''}`} type="button" onClick={() => collectJarHeart(heart)} disabled={jarHearts.includes(heart)} aria-label={`Masukkan hati ${heart + 1} ke love jar`}>♥</button>)}
+              <div className="jar-fill" aria-hidden="true">{jarHearts.map((heart) => <span key={heart}>♥</span>)}</div>
+              <div className="jar-counter" aria-live="polite"><strong>{jarHearts.length}/5</strong><span>{jarHearts.length === 5 ? 'penuh untukmu' : 'hati terkumpul'}</span></div>
+            </div>
+            <p className={`interactive-reveal ${jarHearts.length === 5 ? 'visible' : ''}`} aria-live="polite">Semua rasa kecil dari {gift.from} sudah terkumpul untuk {gift.nickname}. ♥</p>
+          </section>
+
+          <section className="constellation-story story-section">
+            <div className="interactive-heading"><span className="eyebrow">05 · connect our stars</span><h2>Hubungkan bintang kita.</h2><p>Mulai dari bintang yang berkilau, lalu ikuti urutannya.</p></div>
+            <div className={`constellation-game step-${constellationStep} ${constellationStep === 5 ? 'complete' : ''}`}>
+              <img src="/interactives/constellation-sky.png" alt="Langit malam untuk permainan konstelasi" loading="lazy" decoding="async" />
+              {[0, 1, 2, 3].map((line) => <span key={line} className={`star-line star-line-${line + 1} ${constellationStep > line + 1 ? 'active' : ''}`} aria-hidden="true" />)}
+              {[0, 1, 2, 3, 4].map((star) => <button key={star} className={`star-node star-node-${star + 1} ${star < constellationStep ? 'connected' : ''} ${star === constellationStep ? 'next' : ''}`} type="button" onClick={() => connectStar(star)} aria-label={`Bintang ${star + 1}${star === constellationStep ? ', pilih berikutnya' : ''}`}>✦</button>)}
+              <div className="constellation-result" aria-live="polite"><strong>{constellationStep === 5 ? 'K + N' : `${constellationStep}/5`}</strong><span>{constellationStep === 5 ? `${gift.from} selalu memilih ${gift.nickname}.` : 'bintang terhubung'}</span></div>
+            </div>
+          </section>
+
           <section className={`candle-story story-section ${candleBlown ? 'wish-made' : ''}`}>
-            <div className="interactive-heading"><span className="eyebrow">04 · make a wish</span><h2>{candleBlown ? 'Doamu sudah terbang ✦' : 'Tutup mata, lalu buat harapan.'}</h2><p>{candleBlown ? 'Semoga semesta mendengar semuanya.' : 'Tahan tombol lilinnya sampai apinya padam.'}</p></div>
+            <div className="interactive-heading"><span className="eyebrow">06 · make a wish</span><h2>{candleBlown ? 'Doamu sudah terbang ✦' : 'Tutup mata, lalu buat harapan.'}</h2><p>{candleBlown ? 'Semoga semesta mendengar semuanya.' : 'Tahan tombol lilinnya sampai apinya padam.'}</p></div>
             <div className="birthday-cake" aria-hidden="true"><span className="cake-flame" /><span className="cake-candle" /><span className="cake-top">♡ · ♡ · ♡</span><span className="cake-layer cake-layer-one" /><span className="cake-layer cake-layer-two" /></div>
             <button className="candle-hold" style={{ '--wish-progress': `${candleProgress}%` } as React.CSSProperties} onPointerDown={startCandleHold} onPointerUp={() => stopCandleHold()} onPointerLeave={() => stopCandleHold()} onPointerCancel={() => stopCandleHold()} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') startCandleHold(); }} onKeyUp={(event) => { if (event.key === 'Enter' || event.key === ' ') stopCandleHold(); }} disabled={candleBlown} aria-label="Tahan untuk meniup lilin"><span>{candleBlown ? '✓' : '♥'}</span><strong>{candleBlown ? 'Wish made' : 'Tahan di sini'}</strong></button>
             {candleBlown && <div className="final-wish"><p>{gift.ending}</p><blockquote>“{gift.wish}”</blockquote><span>— {gift.from}</span></div>}
