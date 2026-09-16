@@ -587,12 +587,15 @@ export default function Home() {
           </section>
 
           <section className="constellation-story story-section">
-            <div className="interactive-heading"><span className="eyebrow">05 · connect our stars</span><h2>Hubungkan bintang kita.</h2><p>Mulai dari bintang yang berkilau, lalu ikuti urutannya.</p></div>
+            <div className="interactive-heading"><span className="eyebrow">05 · a secret in the sky</span><h2>Tulis nama kita di langit.</h2><p>Sentuh bintang yang berkilau. Setiap titik menyimpan satu kata dari {gift.from}.</p></div>
             <div className={`constellation-game step-${constellationStep} ${constellationStep === 5 ? 'complete' : ''}`}>
               <img src="/interactives/constellation-sky.png" alt="Langit malam untuk permainan konstelasi" loading="lazy" decoding="async" />
+              <div className="constellation-heart-mark" aria-hidden="true">♡</div>
+              <div className="shooting-stars" aria-hidden="true"><span /><span /><span /></div>
               {[0, 1, 2, 3].map((line) => <span key={line} className={`star-line star-line-${line + 1} ${constellationStep > line + 1 ? 'active' : ''}`} aria-hidden="true" />)}
-              {[0, 1, 2, 3, 4].map((star) => <button key={star} className={`star-node star-node-${star + 1} ${star < constellationStep ? 'connected' : ''} ${star === constellationStep ? 'next' : ''}`} type="button" onClick={() => connectStar(star)} aria-label={`Bintang ${star + 1}${star === constellationStep ? ', pilih berikutnya' : ''}`}>✦</button>)}
-              <div className="constellation-result" aria-live="polite"><strong>{constellationStep === 5 ? 'K + N' : `${constellationStep}/5`}</strong><span>{constellationStep === 5 ? `${gift.from} selalu memilih ${gift.nickname}.` : 'bintang terhubung'}</span></div>
+              {['Aku', 'memilih', 'kamu', 'hari ini', 'dan seterusnya'].map((word, star) => <button key={word} className={`star-node star-node-${star + 1} ${star < constellationStep ? 'connected' : ''} ${star === constellationStep ? 'next' : ''}`} type="button" onClick={() => connectStar(star)} aria-label={`Bintang ${star + 1}${star === constellationStep ? ', pilih berikutnya' : ''}`}><span aria-hidden="true">✦</span><small aria-hidden="true">{word}</small></button>)}
+              <div className="constellation-result" aria-live="polite"><strong>{constellationStep === 5 ? 'K ✦ N' : `${constellationStep}/5`}</strong><span>{constellationStep === 5 ? 'our little constellation' : 'kata ditemukan'}</span></div>
+              <p className="constellation-secret" aria-live="polite">{constellationStep === 0 ? 'Temukan pesan rahasianya ✦' : ['Aku', 'Aku memilih', 'Aku memilih kamu', 'Aku memilih kamu hari ini', `Aku memilih kamu hari ini dan seterusnya, ${gift.nickname}.`][constellationStep - 1]}</p>
             </div>
           </section>
 
