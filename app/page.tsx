@@ -157,6 +157,9 @@ const melody = new MelodyPlayer();
 
 export default function Home() {
   const [gift, setGift] = useState<GiftData>(readGiftFromUrl);
+  const [siteLoading, setSiteLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingLeaving, setLoadingLeaving] = useState(false);
   const [draftGift, setDraftGift] = useState<GiftData>(gift);
   const [stage, setStage] = useState<JourneyStage>('intro');
   const [transitioning, setTransitioning] = useState(false);
@@ -192,6 +195,27 @@ export default function Home() {
   const previewRef = useRef<HTMLDivElement>(null);
   const currentTheme = themes[gift.theme];
 
+  useEffect(() => {
+    let current = 0;
+    const interval = window.setInterval(() => {
+      const step = Math.floor(Math.random() * 10) + 6;
+      current = Math.min(100, current + step);
+      setLoadingProgress(current);
+
+      if (current >= 100) {
+        window.clearInterval(interval);
+        window.setTimeout(() => {
+          setLoadingLeaving(true);
+          window.setTimeout(() => {
+            setSiteLoading(false);
+          }, 650);
+        }, 350);
+      }
+    }, 95);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
   useEffect(() => () => {
     melody.pause();
@@ -200,9 +224,9 @@ export default function Home() {
     if (constellationHeartTimerRef.current !== null) window.clearTimeout(constellationHeartTimerRef.current);
   }, []);
   useEffect(() => {
-    document.body.style.overflow = editorOpen || storyPreview ? 'hidden' : '';
+    document.body.style.overflow = editorOpen || storyPreview || siteLoading ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [editorOpen, storyPreview]);
+  }, [editorOpen, storyPreview, siteLoading]);
 
   useEffect(() => {
     const modal = editorOpen ? editorRef.current : storyPreview ? previewRef.current : null;
@@ -465,8 +489,56 @@ export default function Home() {
     <span className="ambient-motif" key={motif.id} style={{ left: motif.left, top: motif.top, animationDelay: motif.delay }}>{motif.icon}</span>
   )), []);
 
+  const loadingCaption = useMemo(() => {
+    if (loadingProgress < 25) return 'Membuka lembaran kejutan...';
+    if (loadingProgress < 55) return `Merapikan bunga untuk ${gift.nickname}...`;
+    if (loadingProgress < 85) return 'Menyusun kenangan & melodi manis...';
+    if (loadingProgress < 100) return 'Sedikit lagi...';
+    return 'Semua sudah siap! ♥';
+  }, [loadingProgress, gift.nickname]);
+
   return (
     <main className={`journey-root theme-${gift.theme}${stage === 'story' ? ' stage-story' : ''}`} style={themeStyle}>
+      {siteLoading && (
+        <div
+          className={`site-buffering-screen ${loadingLeaving ? 'leaving' : ''}`}
+          role="status"
+          aria-label="Memuat kejutan ulang tahun"
+          aria-live="polite"
+        >
+          <div className="buffering-backdrop-glow" aria-hidden="true" />
+          <div className="buffering-ambient" aria-hidden="true">{ambient}</div>
+          <div className="buffering-content">
+            <div className="buffering-icon-wrap">
+              <span className="buffering-halo" aria-hidden="true" />
+              <img
+                src="/journey/birthday-bouquet.webp"
+                alt=""
+                className="buffering-bouquet"
+                decoding="async"
+              />
+              <span className="buffering-heart-pulse" aria-hidden="true">♥</span>
+            </div>
+            <div className="buffering-text-wrap">
+              <span className="buffering-eyebrow">A Special Surprise for {gift.name}</span>
+              <h2 className="buffering-title">Menyiapkan Hadiahmu</h2>
+              <p className="buffering-caption">{loadingCaption}</p>
+            </div>
+            <div className="buffering-progress-container">
+              <div className="buffering-bar-track">
+                <div
+                  className="buffering-bar-fill"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+              <div className="buffering-bar-info">
+                <span>MEMUAT KEJUTAN</span>
+                <strong>{loadingProgress}%</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {toast && <div className="journey-toast" role="status">{toast}</div>}
       <div className={`flower-curtain ${transitioning ? 'active' : ''}`} aria-hidden="true">
         <div className="flower-transition-backdrop" />
